@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Справка по служител</title>
+
+<script src="xlsx-js-style.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f4f6;
+    color: #222;
+}
+
+.page {
+    max-width: 1250px;
+    margin: 25px auto;
+    padding: 0 20px;
+}
+
+.header {
+    background: #252b31;
+    color: white;
+    padding: 16px 20px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 22px;
+}
+
+button,
+input {
+    height: 36px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    padding: 0 10px;
+}
+
+button {
+    cursor: pointer;
+    background: white;
+    font-weight: bold;
+}
+
+.toolbar {
+    margin-top: 18px;
+    padding: 16px;
+    background: white;
+    border: 1px solid #d4d7da;
+    border-radius: 6px;
+}
+
+.search-line,
+.period-line {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.period-line {
+    margin-top: 12px;
+}
+
+.search-line input {
+    width: 330px;
+}
+
+.search-results {
+    position: absolute;
+    background: white;
+    border: 1px solid #aaa;
+    min-width: 330px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-result {
+    padding: 8px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.search-result:hover {
+    background: #eee;
+}
+
+.error {
+    display: none;
+    margin-top: 15px;
+    background: #fbeaea;
+    border: 1px solid #d99;
+    padding: 12px;
+    color: #900;
+    border-radius: 5px;
+}
+
+.employee-card {
+    display: none;
+    margin-top: 18px;
+    background: white;
+    border: 1px solid #d4d7da;
+    border-radius: 6px;
+    padding: 18px;
+}
+
+.employee-title {
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.employee-meta {
+    margin-top: 8px;
+    line-height: 1.7;
+}
+
+.summary {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.summary-box {
+    background: #f5f5f3;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 12px 18px;
+    min-width: 150px;
+}
+
+.summary-value {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.section {
+    margin-top: 22px;
+}
+
+.section h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background: #eceff1;
+}
+
+.numeric {
+    text-align: right;
+}
+
+.total-row {
+    font-weight: bold;
+    background: #f5f5f3;
+}
+
+.actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 8px;
+}
+
+@media print {
+    .header button,
+    .toolbar,
+    .actions,
+    .error {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+    }
+
+    .page {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="header">
+
+        <h1>
+            СПРАВКА ПО СЛУЖИТЕЛ
+        </h1>
+
+        <button onclick="goBack()">
+            Обекти
+        </button>
+
+    </div>
+
+
+    <div class="toolbar">
+
+        <div class="search-line">
+
+            <div style="position:relative">
+
+                <input
+                    id="employeeSearch"
+                    type="text"
+                    placeholder="Идентификатор или име"
+                    autocomplete="off">
+
+                <div
+                    id="searchResults"
+                    class="search-results">
+                </div>
+
+            </div>
+
+            <button onclick="searchEmployees()">
+                Търси
+            </button>
+
+        </div>
+
+
+        <div class="period-line">
+
+            <strong>Период:</strong>
+
+            <label>
+                От
+                <input
+                    id="dateFrom"
+                    type="date">
+            </label>
+
+            <label>
+                До
+                <input
+                    id="dateTo"
+                    type="date">
+            </label>
+
+            <button onclick="loadSelectedEmployee()">
+                Покажи
+            </button>
+
+            <button onclick="clearPeriod()">
+                Целият период
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div id="error" class="error"></div>
+
+    <div class="section">
+
+        <h2>Служители</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Идентификатор</th>
+                    <th>Име</th>
+                    <th>Длъжност</th>
+                    <th>Обекти</th>
+                </tr>
+            </thead>
+
+            <tbody id="employeeListBody"></tbody>
+        </table>
+
+    </div>
+
+
+    <div
+        id="employeeCard"
+        class="employee-card">
+
+        <div
+            id="employeeTitle"
+            class="employee-title">
+        </div>
+
+        <div
+            id="employeeMeta"
+            class="employee-meta">
+        </div>
+
+
+        <div class="summary">
+
+            <div class="summary-box">
+                <div>Обекти</div>
+                <div
+                    id="totalObjects"
+                    class="summary-value">
+                    0
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <div>Работни дни</div>
+                <div
+                    id="totalDays"
+                    class="summary-value">
+                    0
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <div>Изработени часове</div>
+                <div
+                    id="totalHours"
+                    class="summary-value">
+                    0
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button onclick="exportExcel()">
+                Excel
+            </button>
+
+        </div>
+
+
+        <div class="section">
+
+            <h2>
+                Обекти, в които е работил
+            </h2>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Обект</th>
+                        <th>Първа дата</th>
+                        <th>Последна дата</th>
+                        <th>Работни дни</th>
+                        <th>Часове</th>
+                        <th>Нощни<br>часове</th>
+                        <th>Празнични<br>часове</th>
+                        <th>Отпуск</th>
+                        <th>Болнични</th>
+                        <th>Нощни<br>часове</th>
+                        <th>Празнични<br>часове</th>
+                        <th>Отпуск</th>
+                        <th>Болнични</th>
+                    </tr>
+                </thead>
+
+                <tbody id="objectsBody"></tbody>
+
+            </table>
+
+        </div>
+
+
+        <div class="section">
+
+            <h2>
+                Разбивка по месеци
+            </h2>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Месец</th>
+                        <th>Обект</th>
+                        <th>Работни дни</th>
+                        <th>Часове</th>
+                    </tr>
+                </thead>
+
+                <tbody id="monthsBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let selectedEmployeeCode = null;
+let currentReport = null;
+
+
+document.addEventListener(
+    'DOMContentLoaded',
+    async function() {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/auth/me',
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            window.location.href =
+                '/login.php';
+
+            return;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !data.user ||
+            data.user.role !==
+                'admin'
+        ) {
+
+            showError(
+                'Нямате право за достъп до тази справка.'
+            );
+
+            return;
+        }
+
+
+        const input =
+            document.getElementById(
+                'employeeSearch'
+            );
+
+
+        input.addEventListener(
+            'input',
+            function() {
+
+                searchEmployees();
+            }
+        );
+
+
+        // При отваряне показваме всички служители
+        await searchEmployees();
+    }
+);
+
+
+
+async function searchEmployees() {
+
+    const query =
+        document
+            .getElementById(
+                'employeeSearch'
+            )
+            .value
+            .trim();
+
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/reports/employees/search?q=' +
+                encodeURIComponent(
+                    query
+                ),
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при търсене'
+            );
+        }
+
+
+        renderSearchResults(
+            data
+        );
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+    }
+}
+
+
+
+function renderSearchResults(
+    rows
+) {
+
+    const body =
+        document.getElementById(
+            'employeeListBody'
+        );
+
+
+    if (
+        !Array.isArray(rows) ||
+        rows.length === 0
+    ) {
+
+        body.innerHTML =
+            '<tr><td colspan="4">Няма намерени служители</td></tr>';
+
+        return;
+    }
+
+
+    let html = '';
+
+
+    rows.forEach(
+        row => {
+
+            html +=
+                '<tr style="cursor:pointer" ' +
+
+                'onclick="selectEmployee(' +
+
+                '\'' +
+                escapeJs(
+                    row.employee_code
+                ) +
+                '\'' +
+
+                ',' +
+
+                '\'' +
+                escapeJs(
+                    row.name
+                ) +
+                '\'' +
+
+                ')">' +
+
+                '<td>' +
+                escapeHtml(
+                    row.employee_code
+                ) +
+                '</td>' +
+
+                '<td><strong>' +
+                escapeHtml(
+                    row.name
+                ) +
+                '</strong></td>' +
+
+                '<td>' +
+                escapeHtml(
+                    row.position_name || ''
+                ) +
+                '</td>' +
+
+                '<td>' +
+                escapeHtml(
+                    row.object_names || ''
+                ) +
+                '</td>' +
+
+                '</tr>';
+        }
+    );
+
+
+    body.innerHTML =
+        html;
+}
+
+
+
+function selectEmployee(
+    code,
+    name
+) {
+
+    selectedEmployeeCode =
+        code;
+
+
+    document
+        .getElementById(
+            'employeeSearch'
+        )
+        .value =
+            code +
+            ' - ' +
+            name;
+
+
+    hideSearchResults();
+
+
+    loadSelectedEmployee();
+}
+
+
+
+function hideSearchResults() {
+
+    document
+        .getElementById(
+            'searchResults'
+        )
+        .style.display =
+            'none';
+}
+
+
+
+async function loadSelectedEmployee() {
+
+    if (!selectedEmployeeCode) {
+
+        showError(
+            'Изберете служител.'
+        );
+
+        return;
+    }
+
+
+    const from =
+        document
+            .getElementById(
+                'dateFrom'
+            )
+            .value;
+
+
+    const to =
+        document
+            .getElementById(
+                'dateTo'
+            )
+            .value;
+
+
+    let url =
+        '/staff-compat-api.php/api/reports/employee/' +
+        encodeURIComponent(
+            selectedEmployeeCode
+        );
+
+
+    const params =
+        new URLSearchParams();
+
+
+    if (from) {
+        params.set(
+            'from',
+            from
+        );
+    }
+
+
+    if (to) {
+        params.set(
+            'to',
+            to
+        );
+    }
+
+
+    if (
+        params.toString()
+    ) {
+
+        url +=
+            '?' +
+            params.toString();
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                url,
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при справката'
+            );
+        }
+
+
+        currentReport =
+            data;
+
+
+        renderReport(
+            data
+        );
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+    }
+}
+
+
+
+function renderReport(
+    report
+) {
+
+    const employee =
+        report.employee;
+
+
+    document
+        .getElementById(
+            'employeeCard'
+        )
+        .style.display =
+            'block';
+
+
+    document
+        .getElementById(
+            'employeeTitle'
+        )
+        .textContent =
+            employee.name;
+
+
+    document
+        .getElementById(
+            'employeeMeta'
+        )
+        .innerHTML =
+
+            '<strong>Идентификатор:</strong> ' +
+            escapeHtml(
+                employee.employee_code
+            ) +
+
+            '<br>' +
+
+            '<strong>Длъжност:</strong> ' +
+            escapeHtml(
+                employee.position_name ||
+                ''
+            );
+
+
+    document
+        .getElementById(
+            'totalObjects'
+        )
+        .textContent =
+            report.objects.length;
+
+
+    document
+        .getElementById(
+            'totalDays'
+        )
+        .textContent =
+            report.total.work_days;
+
+
+    document
+        .getElementById(
+            'totalHours'
+        )
+        .textContent =
+            formatHours(
+                report.total.hours
+            );
+
+
+    renderObjects(
+        report.objects
+    );
+
+
+    renderMonths(
+        report.months
+    );
+}
+
+
+
+function renderObjects(
+    objects
+) {
+
+    const body =
+        document.getElementById(
+            'objectsBody'
+        );
+
+
+    let html = '';
+
+
+    objects.forEach(
+        row => {
+
+            html +=
+                '<tr>' +
+
+                '<td>' +
+                escapeHtml(
+                    row.object_name
+                ) +
+                '</td>' +
+
+                '<td>' +
+                formatDisplayDate(
+                    row.first_date
+                ) +
+                '</td>' +
+
+                '<td>' +
+                formatDisplayDate(
+                    row.last_date
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                Number(
+                    row.work_days || 0
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                formatHours(
+                    row.hours
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                formatHours(
+                    row.night_hours || 0
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                formatHours(
+                    row.holiday_hours || 0
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                Number(
+                    row.vacation || 0
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                Number(
+                    row.sick || 0
+                ) +
+                '</td>' +
+
+                '</tr>';
+        }
+    );
+
+
+    body.innerHTML =
+        html;
+}
+
+
+
+function renderMonths(
+    months
+) {
+
+    const body =
+        document.getElementById(
+            'monthsBody'
+        );
+
+
+    let html = '';
+
+
+    months.forEach(
+        row => {
+
+            html +=
+                '<tr>' +
+
+                '<td>' +
+                String(
+                    row.month
+                ).padStart(
+                    2,
+                    '0'
+                ) +
+                '/' +
+                row.year +
+                '</td>' +
+
+                '<td>' +
+                escapeHtml(
+                    row.object_name
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                Number(
+                    row.work_days || 0
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                formatHours(
+                    row.hours
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                formatHours(
+                    row.night_hours || 0
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                formatHours(
+                    row.holiday_hours || 0
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                Number(
+                    row.vacation || 0
+                ) +
+                '</td>' +
+
+                '<td class="numeric">' +
+                Number(
+                    row.sick || 0
+                ) +
+                '</td>' +
+
+                '</tr>';
+        }
+    );
+
+
+    if (currentReport) {
+
+        html +=
+            '<tr class="total-row">' +
+
+            '<td colspan="2">ОБЩО</td>' +
+
+            '<td class="numeric">' +
+            Number(
+                currentReport.total.work_days
+            ) +
+            '</td>' +
+
+            '<td class="numeric">' +
+            formatHours(
+                currentReport.total.hours
+            ) +
+            '</td>' +
+
+            '<td class="numeric">' +
+            formatHours(
+                currentReport.total.night_hours || 0
+            ) +
+            '</td>' +
+
+            '<td class="numeric">' +
+            formatHours(
+                currentReport.total.holiday_hours || 0
+            ) +
+            '</td>' +
+
+            '<td class="numeric">' +
+            Number(
+                currentReport.total.vacation || 0
+            ) +
+            '</td>' +
+
+            '<td class="numeric">' +
+            Number(
+                currentReport.total.sick || 0
+            ) +
+            '</td>' +
+
+            '</tr>';
+    }
+
+
+    body.innerHTML =
+        html;
+}
+
+
+
+function clearPeriod() {
+
+    document
+        .getElementById(
+            'dateFrom'
+        )
+        .value =
+            '';
+
+
+    document
+        .getElementById(
+            'dateTo'
+        )
+        .value =
+            '';
+
+
+    if (
+        selectedEmployeeCode
+    ) {
+
+        loadSelectedEmployee();
+    }
+}
+
+
+
+function exportExcel() {
+
+    if (
+        !currentReport ||
+        typeof XLSX ===
+            'undefined'
+    ) {
+
+        showError(
+            'Няма заредена справка.'
+        );
+
+        return;
+    }
+
+
+    const report =
+        currentReport;
+
+
+    const rows = [];
+
+
+    rows.push([
+        'СПРАВКА ПО СЛУЖИТЕЛ'
+    ]);
+
+
+    rows.push([
+        'Идентификатор',
+        report.employee.employee_code
+    ]);
+
+
+    rows.push([
+        'Име',
+        report.employee.name
+    ]);
+
+
+    rows.push([
+        'Длъжност',
+        report.employee.position_name
+    ]);
+
+
+    rows.push([]);
+
+
+    rows.push([
+        'Месец',
+        'Обект',
+        'Работни дни',
+        'Часове',
+        'Нощни часове',
+        'Празнични часове',
+        'Отпуск',
+        'Болнични'
+    ]);
+
+
+    report.months.forEach(
+        row => {
+
+            rows.push([
+                String(row.month)
+                    .padStart(2,'0') +
+                '/' +
+                row.year,
+
+                row.object_name,
+
+                Number(
+                    row.work_days || 0
+                ),
+
+                Number(
+                    row.hours || 0
+                ),
+
+                Number(
+                    row.night_hours || 0
+                ),
+
+                Number(
+                    row.holiday_hours || 0
+                ),
+
+                Number(
+                    row.vacation || 0
+                ),
+
+                Number(
+                    row.sick || 0
+                )
+            ]);
+        }
+    );
+
+
+    rows.push([
+        '',
+        'ОБЩО',
+
+        Number(
+            report.total.work_days
+        ),
+
+        Number(
+            report.total.hours
+        ),
+
+        Number(
+            report.total.night_hours || 0
+        ),
+
+        Number(
+            report.total.holiday_hours || 0
+        ),
+
+        Number(
+            report.total.vacation || 0
+        ),
+
+        Number(
+            report.total.sick || 0
+        )
+    ]);
+
+
+    const ws =
+        XLSX.utils.aoa_to_sheet(
+            rows
+        );
+
+
+    ws['!cols'] = [
+        {wch:16},
+        {wch:30},
+        {wch:14},
+        {wch:14},
+        {wch:14},
+        {wch:14},
+        {wch:14},
+        {wch:14}
+    ];
+
+
+    const wb =
+        XLSX.utils.book_new();
+
+
+    XLSX.utils.book_append_sheet(
+        wb,
+        ws,
+        'Справка'
+    );
+
+
+    XLSX.writeFile(
+        wb,
+        'Spravka_' +
+        report.employee.employee_code +
+        '.xlsx'
+    );
+}
+
+
+
+function formatDisplayDate(
+    value
+) {
+
+    if (!value) {
+        return '';
+    }
+
+
+    const date =
+        String(value)
+            .substring(
+                0,
+                10
+            );
+
+
+    const parts =
+        date.split('-');
+
+
+    if (
+        parts.length !== 3
+    ) {
+        return date;
+    }
+
+
+    return (
+        parts[2] +
+        '.' +
+        parts[1] +
+        '.' +
+        parts[0]
+    );
+}
+
+
+
+function formatHours(
+    value
+) {
+
+    const number =
+        Number(
+            value || 0
+        );
+
+
+    return Number.isInteger(
+        number
+    )
+        ? number
+        : number.toFixed(1);
+}
+
+
+
+function showError(
+    message
+) {
+
+    const box =
+        document.getElementById(
+            'error'
+        );
+
+
+    box.textContent =
+        message;
+
+    box.style.display =
+        'block';
+
+
+    setTimeout(
+        () => {
+
+            box.style.display =
+                'none';
+
+        },
+        6000
+    );
+}
+
+
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ''
+    )
+        .replaceAll(
+            '&',
+            '&amp;'
+        )
+        .replaceAll(
+            '<',
+            '&lt;'
+        )
+        .replaceAll(
+            '>',
+            '&gt;'
+        )
+        .replaceAll(
+            '"',
+            '&quot;'
+        )
+        .replaceAll(
+            "'",
+            '&#039;'
+        );
+}
+
+
+
+function escapeJs(
+    value
+) {
+
+    return String(
+        value ?? ''
+    )
+        .replaceAll(
+            '\\',
+            '\\\\'
+        )
+        .replaceAll(
+            "'",
+            "\\'"
+        );
+}
+
+
+
+function goBack() {
+
+    window.location.href =
+        'obekti.html';
+}
+
+</script>
+
+</body>
+</html>

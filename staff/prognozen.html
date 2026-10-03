@@ -1,0 +1,4912 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Прогнозен график</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f3;
+    color: #1c2b33;
+}
+
+.page {
+    padding: 18px;
+}
+
+.topbar {
+    background: white;
+    border: 1px solid #d3d0c8;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 14px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.object-name {
+    margin-top: 5px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 14px;
+    position: relative;
+}
+
+.back-btn {
+    margin-left: auto;
+}
+
+button,
+select {
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    background: white;
+    padding: 7px 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #eee;
+}
+
+.back-btn {
+    margin-left: auto;
+}
+
+.info {
+    margin: 10px 0;
+    padding: 10px;
+    background: #fff7d6;
+    border: 1px solid #e0c96e;
+    border-radius: 6px;
+}
+
+.error {
+    display: none;
+    margin: 10px 0;
+    padding: 10px;
+    background: #ffdede;
+    border: 1px solid #d99;
+    border-radius: 6px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border: 1px solid #d3d0c8;
+    border-radius: 8px;
+}
+
+table {
+    border-collapse: collapse;
+    min-width: 100%;
+    width: max-content;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    text-align: center;
+    padding: 5px;
+}
+
+thead th {
+    background: #ecebe7;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.employee-head,
+.employee-name {
+    min-width: 190px;
+    text-align: left;
+}
+
+.employee-number {
+    width: 40px;
+}
+
+.day-head,
+.shift-cell {
+    min-width: 38px;
+    width: 38px;
+}
+
+.weekday {
+    display: block;
+    font-size: 10px;
+    color: #666;
+}
+
+.day-number {
+    display: block;
+    font-weight: bold;
+}
+
+.weekend {
+    background: #eeeeee;
+}
+
+.locked {
+    opacity: 0.78;
+    cursor: not-allowed;
+}
+
+.editable {
+    cursor: pointer;
+}
+
+.editable:hover {
+    outline: 2px solid #666;
+    outline-offset: -2px;
+}
+
+.shift-work {
+    background: #dcefe2;
+}
+
+.shift-duty {
+    background: #fff0c9;
+}
+
+.shift-off {
+    background: #f1f1f1;
+}
+
+.shift-vacation {
+    background: #ddebff;
+}
+
+.shift-sick {
+    background: #ffdcdc;
+}
+
+.employee-main-name {
+    font-weight: 700;
+}
+
+.employee-position {
+    font-size: 11px;
+    color: #777;
+}
+
+.extra-label {
+    font-size: 10px;
+    color: #986d00;
+    font-weight: 700;
+}
+
+.extra-worker {
+    background: transparent !important;
+}
+
+.delete-worker {
+    margin-left: 8px;
+    color: #a00;
+}
+
+.add-row td {
+    background: #fafafa;
+}
+
+.add-worker-btn {
+    font-size: 22px;
+    font-weight: bold;
+    width: 42px;
+    height: 34px;
+    padding: 0;
+}
+
+.stat-cell {
+    min-width: 65px;
+    font-weight: 600;
+}
+
+.over-limit {
+    background: #ffd6d6 !important;
+    color: #a00000;
+}
+
+.cell-menu {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    background: white;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    padding: 5px;
+    min-width: 190px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+}
+
+.cell-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin: 2px 0;
+}
+
+.legend {
+    margin-top: 15px;
+    background: white;
+    border: 1px solid #d3d0c8;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.legend-row {
+    margin: 4px 0;
+}
+
+.legend-code {
+    display: inline-block;
+    min-width: 45px;
+    font-weight: bold;
+}
+
+.footer {
+    margin-top: 15px;
+    text-align: right;
+}
+
+@media print {
+    .controls,
+    .info,
+    .error,
+    .add-row,
+    .delete-worker {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+    }
+
+    .page {
+        padding: 0;
+    }
+}
+
+/* =====================================================
+   PRINT - ПРОГНОЗЕН ГРАФИК
+===================================================== */
+
+@media print {
+
+    @page {
+        size: A4 landscape;
+        margin: 8mm;
+    }
+
+    body {
+        margin: 0 !important;
+        background: white !important;
+        font-family: Arial, sans-serif;
+        color: black;
+    }
+
+    .page {
+        padding: 0 !important;
+    }
+
+    /* Скриваме бутоните и помощната информация */
+    .controls,
+    .info,
+    .error,
+    .legend,
+    .add-row,
+    .delete-worker,
+    .cell-menu {
+        display: none !important;
+    }
+
+    .topbar {
+        border: 0 !important;
+        box-shadow: none !important;
+        padding: 0 0 8px 0 !important;
+        margin: 0 !important;
+        text-align: center;
+    }
+
+    .title {
+        font-size: 18px !important;
+        text-align: center;
+        margin: 0;
+    }
+
+    .object-name {
+        font-size: 15px !important;
+        text-align: center;
+        margin-top: 3px;
+    }
+
+    .table-wrapper {
+        overflow: visible !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    table {
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed;
+        border-collapse: collapse;
+        font-size: 8px;
+    }
+
+    th,
+    td {
+        border: 1px solid #000 !important;
+        padding: 2px 1px !important;
+        height: 22px;
+    }
+
+    thead th {
+        position: static !important;
+        background: white !important;
+        color: black !important;
+    }
+
+    .employee-number {
+        width: 22px !important;
+    }
+
+    .employee-head,
+    .employee-name {
+        width: 115px !important;
+        min-width: 115px !important;
+    }
+
+    .day-head,
+    .shift-cell {
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+    .weekday {
+        font-size: 7px !important;
+    }
+
+    .day-number {
+        font-size: 8px !important;
+    }
+
+    .employee-main-name {
+        font-size: 8px !important;
+    }
+
+    .employee-position,
+    .extra-label {
+        display: none !important;
+    }
+
+    /*
+       Последните 5 колони:
+       Раб. дни
+       Часове
+       Деж.
+       Отпуск
+       Болн.
+    */
+
+    table th:nth-last-child(-n+5),
+    table td:nth-last-child(-n+5) {
+        display: none !important;
+    }
+
+    .footer {
+        margin-top: 10px !important;
+        font-size: 10px;
+        text-align: right;
+    }
+}
+
+
+/* =====================================================
+   EMPLOYEE COLUMN
+===================================================== */
+
+.employee-head,
+.employee-name {
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
+}
+
+.employee-name {
+    position: relative;
+    padding: 6px 8px !important;
+    vertical-align: middle;
+    text-align: left;
+}
+
+.employee-main-name {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.employee-position {
+    margin-top: 2px;
+    font-size: 10px;
+    line-height: 1.2;
+    color: #777;
+}
+
+.delete-worker {
+    float: right;
+    margin: 3px 0 0 5px;
+    padding: 1px 5px;
+    line-height: 16px;
+}
+
+
+/* =====================================================
+   SAME CALENDAR COLORS AS MAIN GRAFIK
+===================================================== */
+
+.calendar-off {
+    background: #c9e3c9 !important;
+}
+
+.calendar-holiday {
+    background: #9fc89f !important;
+}
+
+/* Смените нямат собствен фон */
+.shift-work,
+.shift-duty,
+.shift-off,
+.shift-vacation,
+.shift-sick {
+    background: transparent !important;
+}
+
+
+/* =====================================================
+   FULL CALENDAR COLUMN COLORS
+===================================================== */
+
+/* Почивен / неприсъствен ден - цялата колона */
+table th.calendar-off,
+table td.calendar-off,
+table td.shift-cell.calendar-off {
+    background: #c9e3c9 !important;
+}
+
+/* Официален празник - цялата колона */
+table th.calendar-holiday,
+table td.calendar-holiday,
+table td.shift-cell.calendar-holiday {
+    background: #9fc89f !important;
+}
+
+/* Всички типове смени не могат да презапишат календарния фон */
+table td.shift-cell.shift-work.calendar-off,
+table td.shift-cell.shift-duty.calendar-off,
+table td.shift-cell.shift-off.calendar-off,
+table td.shift-cell.shift-vacation.calendar-off,
+table td.shift-cell.shift-sick.calendar-off {
+    background: #c9e3c9 !important;
+}
+
+table td.shift-cell.shift-work.calendar-holiday,
+table td.shift-cell.shift-duty.calendar-holiday,
+table td.shift-cell.shift-off.calendar-holiday,
+table td.shift-cell.shift-vacation.calendar-holiday,
+table td.shift-cell.shift-sick.calendar-holiday {
+    background: #9fc89f !important;
+}
+
+
+/* =====================================================
+   EXTRA WORKER - SAME ROW STYLE AS NORMAL EMPLOYEES
+===================================================== */
+
+tr.extra-worker,
+tr.extra-worker td,
+.extra-worker,
+.extra-worker td {
+    background: inherit !important;
+}
+
+/* Клетките за дните следват нормалния фон */
+tr.extra-worker td.shift-cell {
+    background: transparent !important;
+}
+
+/* Зелените календарни колони остават с приоритет */
+tr.extra-worker td.shift-cell.calendar-off {
+    background: #c9e3c9 !important;
+}
+
+tr.extra-worker td.shift-cell.calendar-holiday {
+    background: #9fc89f !important;
+}
+
+
+/* =====================================================
+   COMPACT STATS COLUMNS
+===================================================== */
+
+.stat-cell {
+    min-width: 46px !important;
+    width: 46px !important;
+    padding: 3px 4px !important;
+    font-size: 11px !important;
+    font-weight: 600;
+}
+
+.stats-head,
+th.stat-cell {
+    min-width: 46px !important;
+    width: 46px !important;
+    padding: 3px 4px !important;
+    font-size: 10px !important;
+}
+
+
+.stats-head,
+.stat-cell {
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    padding: 2px 3px !important;
+    font-size: 10px !important;
+    white-space: normal !important;
+}
+
+
+/* =====================================================
+   FORECAST EMPLOYEE MODAL
+===================================================== */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal {
+    background: #fff;
+    border: 1px solid #cfd3d7;
+    border-radius: 6px;
+    width: 420px;
+    max-width: calc(100vw - 30px);
+    box-shadow: 0 8px 30px rgba(0,0,0,.28);
+}
+
+.modal-header {
+    padding: 12px 15px;
+    border-bottom: 1px solid #d7dadd;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.modal-body {
+    padding: 15px;
+}
+
+.modal-footer {
+    padding: 12px 15px;
+    border-top: 1px solid #d7dadd;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.modal-footer button {
+    padding: 7px 14px;
+}
+
+.modal-footer .save {
+    font-weight: 700;
+}
+
+.form-group {
+    margin-bottom: 13px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 9px;
+    border: 1px solid #bfc4c8;
+    border-radius: 4px;
+    font: inherit;
+}
+
+.modal-error {
+    color: #a32626;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   FORECAST EMPLOYEE MODAL FIX
+===================================================== */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    background: rgba(0,0,0,.45);
+
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.open {
+    display: flex !important;
+}
+
+.modal {
+    width: 420px;
+    max-width: calc(100vw - 30px);
+
+    background: white;
+    border: 1px solid #c5c9cc;
+    border-radius: 5px;
+
+    box-shadow:
+        0 10px 30px
+        rgba(0,0,0,.30);
+}
+
+.modal-header {
+    padding: 12px 15px;
+
+    border-bottom:
+        1px solid #d5d8da;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.modal-body {
+    padding: 15px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    padding: 12px 15px;
+
+    border-top:
+        1px solid #d5d8da;
+}
+
+.form-group {
+    margin-bottom: 13px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 8px;
+
+    border:
+        1px solid #b8bdc1;
+
+    border-radius: 4px;
+
+    font: inherit;
+}
+
+.modal-error {
+    min-height: 16px;
+
+    margin-bottom: 8px;
+
+    color: #a32626;
+
+    font-size: 12px;
+}
+
+
+
+/* =====================================================
+   TABLE VISUAL SYNC WITH grafik.html
+   Grafik v1.0
+===================================================== */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+    background: #fff;
+}
+
+th,
+td {
+    border: 1px solid #8f959b;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+}
+
+thead th {
+    font-weight: bold;
+}
+
+/* № */
+.num-head,
+.employee-number {
+    width: 34px;
+    min-width: 34px;
+}
+
+.employee-number {
+    font-size: 12px;
+}
+
+/* Служител */
+.employee-head,
+.employee-name {
+    width: 225px;
+    min-width: 225px;
+    max-width: 225px;
+}
+
+.employee-name {
+    text-align: left;
+    padding: 6px 7px;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.employee-main-name {
+    font-size: 13px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.employee-position {
+    font-size: 10px;
+    font-weight: normal;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Дни */
+.day-head {
+    width: 35px;
+    min-width: 35px;
+}
+
+.weekday {
+    display: block;
+    font-size: 10px;
+    padding-top: 4px;
+}
+
+.day-number {
+    display: block;
+    font-size: 13px;
+    padding: 3px 0 5px;
+}
+
+/* Смени */
+.shift-cell {
+    width: 35px;
+    min-width: 35px;
+    height: 36px;
+    padding: 0;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* Статистика */
+.stats-head {
+    min-width: 70px;
+    padding: 4px 5px;
+    font-size: 10px;
+}
+
+.stat-cell {
+    min-width: 70px;
+    padding: 4px 5px;
+    font-size: 12px;
+}
+
+
+</style>
+<script src="xlsx-js-style.min.js"></script>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="topbar">
+
+        <div class="title">
+            ПРОГНОЗЕН ГРАФИК
+        </div>
+
+        <div
+            id="objectName"
+            class="object-name">
+        </div>
+
+        <div class="controls">
+
+            <button onclick="previousMonth()">◀</button>
+
+            <select id="monthSelect"></select>
+
+            <select id="yearSelect"></select>
+
+            <button onclick="nextMonth()">▶</button>
+
+            <button
+                id="period1Button"
+                onclick="setForecastPeriod(1)">
+                Вариант 1
+            </button>
+
+            <button
+                id="period2Button"
+                onclick="setForecastPeriod(2)">
+                Вариант 2
+            </button>
+
+            <button onclick="generateForecast()">
+                Генерирай
+            </button>
+
+            <button onclick="openForecastEmployeeModal()">
+                + Служител
+            </button>
+
+            <button onclick="exportForecastExcel()">
+                Excel
+            </button>
+
+            <button
+                class="back-btn"
+                onclick="goBack()">
+                Обекти
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+
+
+    <div id="error" class="error"></div>
+
+
+    <div
+        id="tableWrapper"
+        class="table-wrapper">
+
+        <div style="padding:20px">
+            Зареждане...
+        </div>
+
+    </div>
+
+
+    <div id="legend" class="legend"></div>
+
+
+    <div class="footer">
+        Съставил прогнозния график:
+        <strong id="scheduleAuthor"></strong>
+    </div>
+
+</div>
+
+
+
+<div id="forecastEmployeeModalOverlay" class="modal-overlay">
+
+    <div class="modal">
+
+        <div class="modal-header">
+            Нов служител
+        </div>
+
+        <div class="modal-body">
+
+            <div id="forecastEmployeeModalError" class="modal-error"></div>
+
+            <div class="form-group">
+                <label>Идентификатор</label>
+                <input
+                    id="forecastEmployeeCode"
+                    type="text"
+                    maxlength="50">
+            </div>
+
+            <div class="form-group">
+                <label>Име на служителя</label>
+                <input
+                    id="forecastEmployeeName"
+                    type="text"
+                    maxlength="150">
+            </div>
+
+            <div class="form-group">
+                <label>Длъжност / отдел</label>
+                <input
+                    id="forecastEmployeePosition"
+                    type="text"
+                    maxlength="150">
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button onclick="closeForecastEmployeeModal()">
+                Отказ
+            </button>
+
+            <button
+                class="save"
+                onclick="saveForecastEmployee()">
+                Запази
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div id="cellMenu" class="cell-menu"></div>
+
+
+<script>
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const objectId =
+    Number(
+        params.get('object')
+    );
+
+
+if (!objectId) {
+    window.location.href =
+        'obekti.html';
+}
+
+
+let currentUser = null;
+let currentObject = null;
+
+let shifts = [];
+
+let workCalendar = null;
+let workCalendarDays = [];
+
+
+async function loadWorkCalendar(
+    year,
+    month
+) {
+
+    workCalendar = null;
+    workCalendarDays = [];
+
+
+    try {
+
+        const calendarResponse =
+            await fetch(
+                '/staff-compat-api.php/api/calendar/' +
+                year +
+                '/' +
+                month,
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (!calendarResponse.ok) {
+            throw new Error(
+                'Няма данни за работния календар.'
+            );
+        }
+
+
+        workCalendar =
+            await calendarResponse.json();
+
+
+        const daysResponse =
+            await fetch(
+                '/staff-compat-api.php/api/calendar/' +
+                year +
+                '/' +
+                month +
+                '/days',
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (!daysResponse.ok) {
+            throw new Error(
+                'Не могат да се заредят дните от календара.'
+            );
+        }
+
+
+        const daysData =
+            await daysResponse.json();
+
+
+        workCalendarDays =
+            Array.isArray(daysData)
+                ? daysData
+                : [];
+
+
+        if (
+            workCalendar &&
+            workCalendar.fallback
+        ) {
+
+            showError(
+                'Календарът не е обновен. ' +
+                'Използват се последните локални данни.'
+            );
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            'Calendar:',
+            error
+        );
+
+        showError(
+            'Работният календар не може да бъде зареден.'
+        );
+    }
+}
+
+
+
+function getCalendarDay(
+    year,
+    month,
+    day
+) {
+
+    const dateString =
+        year +
+        '-' +
+        String(month).padStart(2, '0') +
+        '-' +
+        String(day).padStart(2, '0');
+
+
+    return workCalendarDays.find(
+        item =>
+            item.work_date ===
+            dateString
+    ) || null;
+}
+
+
+
+function calendarDayClass(
+    year,
+    month,
+    day
+) {
+
+    const calendarDay =
+        getCalendarDay(
+            year,
+            month,
+            day
+        );
+
+
+    if (calendarDay) {
+
+        if (
+            Number(
+                calendarDay.is_holiday
+            ) === 1
+        ) {
+            return 'calendar-holiday';
+        }
+
+
+        if (
+            Number(
+                calendarDay.is_workday
+            ) !== 1
+        ) {
+            return 'calendar-off';
+        }
+    }
+
+
+    return '';
+}
+
+
+
+function calendarDayTitle(
+    year,
+    month,
+    day
+) {
+
+    const calendarDay =
+        getCalendarDay(
+            year,
+            month,
+            day
+        );
+
+
+    return (
+        calendarDay &&
+        calendarDay.holiday_name
+            ? calendarDay.holiday_name
+            : ''
+    );
+}
+
+
+let forecast = null;
+let forecastPeriod = 1;
+let editingForecastWorkerId = null;
+let workers = [];
+let entries = [];
+
+let selectedWorkerId = null;
+let selectedDate = null;
+
+
+const weekdayNames = [
+    'Нд',
+    'Пн',
+    'Вт',
+    'Ср',
+    'Чт',
+    'Пт',
+    'Сб'
+];
+
+
+const monthNames = [
+    '',
+    'Януари',
+    'Февруари',
+    'Март',
+    'Април',
+    'Май',
+    'Юни',
+    'Юли',
+    'Август',
+    'Септември',
+    'Октомври',
+    'Ноември',
+    'Декември'
+];
+
+
+document.addEventListener(
+    'DOMContentLoaded',
+    init
+);
+
+
+async function init() {
+
+    setupDateSelectors();
+
+    const userOk =
+        await loadCurrentUser();
+
+    if (!userOk) {
+        return;
+    }
+
+    const objectOk =
+        await loadObject();
+
+    if (!objectOk) {
+        return;
+    }
+
+    await loadShifts();
+
+    await loadForecast();
+}
+
+
+
+function setupDateSelectors() {
+
+    const monthSelect =
+        document.getElementById(
+            'monthSelect'
+        );
+
+    const yearSelect =
+        document.getElementById(
+            'yearSelect'
+        );
+
+
+    for (
+        let month = 1;
+        month <= 12;
+        month++
+    ) {
+
+        const option =
+            document.createElement(
+                'option'
+            );
+
+        option.value =
+            month;
+
+        option.textContent =
+            monthNames[month];
+
+        monthSelect.appendChild(
+            option
+        );
+    }
+
+
+    const now =
+        new Date();
+
+
+    for (
+        let year =
+            now.getFullYear() - 5;
+
+        year <=
+            now.getFullYear() + 5;
+
+        year++
+    ) {
+
+        const option =
+            document.createElement(
+                'option'
+            );
+
+        option.value =
+            year;
+
+        option.textContent =
+            year;
+
+        yearSelect.appendChild(
+            option
+        );
+    }
+
+
+    monthSelect.value =
+        now.getMonth() + 1;
+
+    yearSelect.value =
+        now.getFullYear();
+
+
+    monthSelect.addEventListener(
+        'change',
+        loadForecast
+    );
+
+
+    yearSelect.addEventListener(
+        'change',
+        loadForecast
+    );
+}
+
+
+
+async function loadCurrentUser() {
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/auth/me',
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            window.location.href =
+                '/login.php';
+
+            return false;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        currentUser =
+            data.user;
+
+
+        document
+            .getElementById(
+                'scheduleAuthor'
+            )
+            .textContent =
+                currentUser.full_name;
+
+
+        return true;
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+
+        return false;
+    }
+}
+
+
+
+async function loadObject() {
+
+    const data =
+        await apiFetch(
+            '/staff-compat-api.php/api/objects/' +
+            objectId
+        );
+
+
+    if (!data) {
+        return false;
+    }
+
+
+    currentObject =
+        data;
+
+
+    document
+        .getElementById(
+            'objectName'
+        )
+        .textContent =
+            currentObject.name;
+
+
+    return true;
+}
+
+
+
+async function loadShifts() {
+
+    const data =
+        await apiFetch(
+            '/staff-compat-api.php/api/objects/' +
+            objectId +
+            '/shifts'
+        );
+
+
+    shifts =
+        Array.isArray(data)
+            ? data.filter(
+                shift =>
+                    Number(
+                        shift.active
+                    ) === 1
+            )
+            : [];
+
+
+    renderLegend();
+}
+
+
+
+
+
+async function generateForecast() {
+
+    const year =
+        Number(
+            document
+                .getElementById(
+                    'yearSelect'
+                )
+                .value
+        );
+
+
+    const month =
+        Number(
+            document
+                .getElementById(
+                    'monthSelect'
+                )
+                .value
+        );
+
+
+    if (
+        !confirm(
+            'Да генерирам ли Прогноза ' +
+            forecastPeriod +
+            '? Съществуващите ръчни промени ще бъдат заменени.'
+        )
+    ) {
+        return;
+    }
+
+
+    const response =
+        await fetch(
+            '/staff-compat-api.php/api/forecasts/' +
+            objectId +
+            '/' +
+            year +
+            '/' +
+            month +
+            '/' +
+            forecastPeriod +
+            '/generate',
+            {
+                method:
+                    'POST',
+
+                credentials:
+                    'same-origin'
+            }
+        );
+
+
+    const data =
+        await response
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!response.ok) {
+
+        showError(
+            data.error ||
+            'Грешка при генериране'
+        );
+
+        return;
+    }
+
+
+    await loadForecast();
+}
+
+
+function setForecastPeriod(
+    period
+) {
+
+    forecastPeriod =
+        Number(period);
+
+
+    const button1 =
+        document.getElementById(
+            'period1Button'
+        );
+
+    const button2 =
+        document.getElementById(
+            'period2Button'
+        );
+
+
+    if (button1) {
+
+        button1.classList.toggle(
+            'active-period',
+            forecastPeriod === 1
+        );
+    }
+
+
+    if (button2) {
+
+        button2.classList.toggle(
+            'active-period',
+            forecastPeriod === 2
+        );
+    }
+
+
+    loadForecast();
+}
+
+
+
+function updatePeriodButtons() {
+
+    const button1 =
+        document.getElementById(
+            'period1Button'
+        );
+
+    const button2 =
+        document.getElementById(
+            'period2Button'
+        );
+
+
+    if (button1) {
+
+        button1.classList.toggle(
+            'active-period',
+            forecastPeriod === 1
+        );
+    }
+
+
+    if (button2) {
+
+        button2.classList.toggle(
+            'active-period',
+            forecastPeriod === 2
+        );
+    }
+}
+
+
+async function loadForecast(
+    silent = false
+) {
+
+    closeCellMenu();
+
+    updatePeriodButtons();
+
+    // Изчистваме предишния месец преди новото зареждане
+    forecast = null;
+    workers = [];
+    entries = [];
+
+    if (!silent) {
+
+        document
+            .getElementById(
+                'tableWrapper'
+            )
+            .innerHTML =
+                '<div style="padding:20px">Зареждане...</div>';
+    }
+
+
+    const year =
+        Number(
+            document
+                .getElementById(
+                    'yearSelect'
+                )
+                .value
+        );
+
+
+    const month =
+        Number(
+            document
+                .getElementById(
+                    'monthSelect'
+                )
+                .value
+        );
+
+
+    /*
+       Ако прогнозата не съществува,
+       init я създава и копира 1-15.
+    */
+
+    let response =
+        await fetch(
+            '/staff-compat-api.php/api/forecasts/' +
+            objectId +
+            '/' +
+            year +
+            '/' +
+            month +
+            '/' +
+            forecastPeriod +
+            '/init',
+            {
+                method:
+                    'POST',
+
+                credentials:
+                    'same-origin'
+            }
+        );
+
+
+    let data =
+        await response
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!response.ok) {
+
+        showError(
+            data.error ||
+            'Грешка при създаване на прогнозата'
+        );
+
+        return;
+    }
+
+
+    response =
+        await fetch(
+            '/staff-compat-api.php/api/forecasts/' +
+            objectId +
+            '/' +
+            year +
+            '/' +
+            month +
+            '/' +
+            forecastPeriod,
+            {
+                credentials:
+                    'same-origin'
+            }
+        );
+
+
+    data =
+        await response
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!response.ok) {
+
+        showError(
+            data.error ||
+            'Грешка при зареждане'
+        );
+
+        return;
+    }
+
+
+    forecast =
+        data.forecast;
+
+    workers =
+        Array.isArray(
+            data.workers
+        )
+            ? data.workers
+            : [];
+
+    entries =
+        Array.isArray(
+            data.entries
+        )
+            ? data.entries
+            : [];
+
+
+    await loadWorkCalendar(
+        year,
+        month
+    );
+
+
+    renderSchedule(
+        year,
+        month
+    );
+}
+
+
+
+function renderSchedule(
+    year,
+    month
+) {
+
+    const wrapper =
+        document.getElementById(
+            'tableWrapper'
+        );
+
+
+    const daysInMonth =
+        new Date(
+            year,
+            month,
+            0
+        ).getDate();
+
+
+    const startDay = 1;
+    const endDay = daysInMonth;
+
+
+    let html =
+        '<table>';
+
+
+    html +=
+        '<thead><tr>';
+
+
+    html +=
+        '<th>№</th>';
+
+    html +=
+        '<th class="employee-head">Служител</th>';
+
+
+    for (
+        let day = startDay;
+        day <= endDay;
+        day++
+    ) {
+
+        const date =
+            new Date(
+                year,
+                month - 1,
+                day
+            );
+
+
+        const holidayTitle =
+            calendarDayTitle(
+                year,
+                month,
+                day
+            );
+
+
+        html +=
+            '<th class="day-head ' +
+            calendarDayClass(
+                year,
+                month,
+                day
+            ) +
+            '" ' +
+            (
+                holidayTitle
+                    ? 'title="' +
+                      holidayTitle +
+                      '"'
+                    : ''
+            ) +
+            '>' +
+
+            '<span class="weekday">' +
+            weekdayNames[
+                date.getDay()
+            ] +
+            '</span>' +
+
+            '<span class="day-number">' +
+            day +
+            '</span>' +
+
+            '</th>';
+    }
+
+
+    html +=
+        '<th class="stats-head" title="Работни дни">Раб.<br>дни</th>';
+
+    html +=
+        '<th class="stats-head" title="Часове">Час.</th>';
+
+    html +=
+        '<th class="stats-head" title="Нощни часове">Нощ.</th>';
+
+    html +=
+        '<th class="stats-head" title="Празнични часове">Празн.</th>';
+
+    html +=
+        '<th class="stats-head" title="Дежурства">Деж.</th>';
+
+    html +=
+        '<th class="stats-head" title="Отпуск">Отп.</th>';
+
+    html +=
+        '<th class="stats-head" title="Болнични">Болн.</th>';
+
+
+    html +=
+        '</tr></thead>';
+
+
+    html +=
+        '<tbody>';
+
+
+    workers.forEach(
+        (worker, index) => {
+
+            const stats =
+                calculateStats(
+                    worker.id,
+                    year,
+                    month
+                );
+
+
+            html +=
+                '<tr class="' +
+                (
+                    Number(
+                        worker.is_extra
+                    ) === 1
+                        ? 'extra-worker'
+                        : ''
+                ) +
+                '">';
+
+
+            html +=
+                '<td class="employee-number">' +
+                (index + 1) +
+                '</td>';
+
+
+            html +=
+                '<td class="employee-name">' +
+
+                '<div class="employee-main-name">' +
+                escapeHtml(
+                    worker.name
+                ) +
+
+                '</div>';
+
+
+            if (
+                worker.position_name
+            ) {
+
+                html +=
+                    '<div class="employee-position">' +
+                    escapeHtml(
+                        worker.position_name
+                    ) +
+                    '</div>';
+            }
+
+
+            if (
+                Number(
+                    worker.is_extra
+                ) === 1
+            ) {
+
+                html +=
+                    '<span class="extra-label">Доп.</span>';
+
+
+                const safeWorkerName =
+                    String(
+                        worker.name || ''
+                    )
+                    .replace(/\\/g, '\\\\')
+                    .replace(/'/g, "\\'");
+
+
+                html +=
+                    '<button class="edit-worker" ' +
+                    'onclick="event.stopPropagation();openForecastEmployeeModal(' +
+                    Number(worker.id) +
+                    ',\'' +
+                    safeWorkerName +
+                    '\')">✎</button>';
+
+
+                html +=
+                    '<button class="delete-worker" ' +
+                    'onclick="event.stopPropagation();deleteWorker(' +
+                    Number(worker.id) +
+                    ')">×</button>';
+            }
+
+
+            html +=
+                '</td>';
+
+
+            for (
+        let day = startDay;
+        day <= endDay;
+        day++
+    ) {
+
+                const dateString =
+                    formatDate(
+                        year,
+                        month,
+                        day
+                    );
+
+
+                const entry =
+                    findEntry(
+                        worker.id,
+                        dateString
+                    );
+
+
+                const shift =
+                    entry
+                        ? findShift(
+                            entry.shift_id
+                        )
+                        : null;
+
+
+                const date =
+                    new Date(
+                        year,
+                        month - 1,
+                        day
+                    );
+
+
+                const weekend =
+                    false;
+
+
+                const locked =
+                    day <= 15 &&
+                    Number(
+                        worker.is_extra
+                    ) === 0;
+
+
+                const cssClass =
+                    shift
+                        ? shiftClass(
+                            shift.type
+                        )
+                        : '';
+
+
+                html +=
+                    '<td ' +
+
+                    'class="shift-cell ' +
+
+                    (
+                        calendarDayClass(
+                            year,
+                            month,
+                            day
+                        ) + ' '
+                    ) +
+
+                    cssClass +
+                    ' ' +
+
+                    'editable' +
+
+                    '" ' +
+
+                    'data-worker="' +
+                    worker.id +
+                    '" ' +
+
+                    'data-date="' +
+                    dateString +
+                    '" ' +
+
+                    'onclick="cellClick(event,this)" ' +
+
+                    'title="' +
+                    (
+                        shift
+                            ? escapeHtml(
+                                shift.name
+                            )
+                            : ''
+                    ) +
+                    '">' +
+
+                    (
+                        shift
+                            ? (
+                                shift.type === 'off'
+                                    ? ''
+                                    : escapeHtml(
+                                        shift.code
+                                    )
+                              )
+                            : ''
+                    ) +
+
+                    '</td>';
+            }
+
+
+            html +=
+                '<td class="stat-cell" style="font-weight:700 !important;">' +
+                stats.workDays +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell ' +
+                (
+                    stats.hours > 160
+                        ? 'over-limit'
+                        : ''
+                ) +
+                '" style="font-weight:700 !important;">' +
+                formatHours(
+                    stats.hours
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell" style="font-weight:700 !important;">' +
+                formatHours(
+                    stats.nightHours || 0
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell" style="font-weight:700 !important;">' +
+                formatHours(
+                    stats.holidayHours || 0
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell" style="font-weight:700 !important;">' +
+                stats.duties +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell" style="font-weight:700 !important;">' +
+                stats.vacation +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell" style="font-weight:700 !important;">' +
+                stats.sick +
+                '</td>';
+
+
+            html +=
+                '</tr>';
+        }
+    );
+
+
+    html +=
+        '</tbody></table>';
+
+
+    wrapper.innerHTML =
+        html;
+}
+
+
+
+
+function openForecastEmployeeModal(
+    workerId = null
+) {
+
+    editingForecastWorkerId =
+        workerId !== null
+            ? Number(workerId)
+            : null;
+
+
+    const worker =
+        editingForecastWorkerId
+            ? workers.find(
+                item =>
+                    Number(item.id) ===
+                    editingForecastWorkerId
+              )
+            : null;
+
+
+    document.getElementById(
+        'forecastEmployeeCode'
+    ).value =
+        worker
+            ? (
+                worker.employee_code ||
+                ''
+              )
+            : '';
+
+
+    document.getElementById(
+        'forecastEmployeeName'
+    ).value =
+        worker
+            ? (
+                worker.name ||
+                ''
+              )
+            : '';
+
+
+    document.getElementById(
+        'forecastEmployeePosition'
+    ).value =
+        worker
+            ? (
+                worker.position_name ||
+                ''
+              )
+            : '';
+
+
+    document.getElementById(
+        'forecastEmployeeModalError'
+    ).textContent = '';
+
+
+    const overlay =
+        document.getElementById(
+            'forecastEmployeeModalOverlay'
+        );
+
+
+    overlay.classList.add(
+        'open'
+    );
+}
+
+
+
+function closeForecastEmployeeModal() {
+
+    editingForecastWorkerId = null;
+
+    const overlay =
+        document.getElementById(
+            'forecastEmployeeModalOverlay'
+        );
+
+
+    if (overlay) {
+
+        overlay.classList.remove(
+            'open'
+        );
+    }
+}
+
+
+
+async function saveForecastEmployee() {
+
+    const errorBox =
+        document.getElementById(
+            'forecastEmployeeModalError'
+        );
+
+
+    errorBox.textContent = '';
+
+
+    const employeeCode =
+        document.getElementById(
+            'forecastEmployeeCode'
+        )
+        .value
+        .trim();
+
+
+    const name =
+        document.getElementById(
+            'forecastEmployeeName'
+        )
+        .value
+        .trim();
+
+
+    const position =
+        document.getElementById(
+            'forecastEmployeePosition'
+        )
+        .value
+        .trim();
+
+
+    if (!name) {
+
+        errorBox.textContent =
+            'Въведете име на служителя.';
+
+        return;
+    }
+
+
+    const year =
+        Number(
+            document.getElementById(
+                'yearSelect'
+            ).value
+        );
+
+
+    const month =
+        Number(
+            document.getElementById(
+                'monthSelect'
+            ).value
+        );
+
+
+    const response =
+        await fetch(
+            editingForecastWorkerId
+                ? (
+                    '/staff-compat-api.php/api/forecasts/' +
+                    objectId +
+                    '/workers/' +
+                    editingForecastWorkerId
+                  )
+                : (
+                    '/staff-compat-api.php/api/forecasts/' +
+                    objectId +
+                    '/' +
+                    year +
+                    '/' +
+                    month +
+                    '/' +
+                    forecastPeriod +
+                    '/workers'
+                  ),
+            {
+                method:
+                    editingForecastWorkerId
+                        ? 'PUT'
+                        : 'POST',
+
+                credentials:
+                    'same-origin',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body:
+                    JSON.stringify({
+
+                        employee_code:
+                            employeeCode,
+
+                        name:
+                            name,
+
+                        position_name:
+                            position
+                    })
+            }
+        );
+
+
+    const data =
+        await response
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!response.ok) {
+
+        errorBox.textContent =
+            data.error ||
+            'Грешка при добавяне.';
+
+        return;
+    }
+
+
+    closeForecastEmployeeModal();
+
+
+    await loadForecast(
+        true
+    );
+}
+
+
+async function addWorker() {
+
+    const name =
+        prompt(
+            'Име на допълнителния служител:'
+        );
+
+
+    if (
+        name === null ||
+        !name.trim()
+    ) {
+        return;
+    }
+
+
+    const year =
+        Number(
+            document
+                .getElementById(
+                    'yearSelect'
+                )
+                .value
+        );
+
+
+    const month =
+        Number(
+            document
+                .getElementById(
+                    'monthSelect'
+                )
+                .value
+        );
+
+
+    const response =
+        await fetch(
+            '/staff-compat-api.php/api/forecasts/' +
+            objectId +
+            '/' +
+            year +
+            '/' +
+            month +
+            '/' +
+            forecastPeriod +
+            '/workers',
+            {
+                method:
+                    'POST',
+
+                credentials:
+                    'same-origin',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body:
+                    JSON.stringify({
+                        name:
+                            name.trim()
+                    })
+            }
+        );
+
+
+    const data =
+        await response
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!response.ok) {
+
+        showError(
+            data.error ||
+            'Грешка при добавяне'
+        );
+
+        return;
+    }
+
+
+    await loadForecast();
+}
+
+
+
+
+async function renameWorker(
+    workerId,
+    currentName
+) {
+
+    const newName =
+        prompt(
+            'Ново име на допълнителния служител:',
+            currentName || ''
+        );
+
+
+    if (
+        newName === null ||
+        !newName.trim()
+    ) {
+        return;
+    }
+
+
+    const response =
+        await fetch(
+            '/staff-compat-api.php/api/forecasts/' +
+            objectId +
+            '/workers/' +
+            workerId +
+            '/name',
+            {
+                method:
+                    'PUT',
+
+                credentials:
+                    'same-origin',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body:
+                    JSON.stringify({
+                        name:
+                            newName.trim()
+                    })
+            }
+        );
+
+
+    const data =
+        await response
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!response.ok) {
+
+        showError(
+            data.error ||
+            'Грешка при промяна на името'
+        );
+
+        return;
+    }
+
+
+    await loadForecast();
+}
+
+
+async function deleteWorker(
+    workerId
+) {
+
+    if (
+        !confirm(
+            'Да изтрия ли допълнителния служител?'
+        )
+    ) {
+        return;
+    }
+
+
+    const response =
+        await fetch(
+            '/staff-compat-api.php/api/forecasts/' +
+            objectId +
+            '/workers/' +
+            workerId,
+            {
+                method:
+                    'DELETE',
+
+                credentials:
+                    'same-origin'
+            }
+        );
+
+
+    const data =
+        await response
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!response.ok) {
+
+        showError(
+            data.error ||
+            'Грешка при изтриване'
+        );
+
+        return;
+    }
+
+
+    await loadForecast();
+}
+
+
+
+
+
+function cellClick(
+    event,
+    cell
+) {
+
+    event.stopPropagation();
+
+
+    selectedWorkerId =
+        Number(
+            cell.dataset.worker
+        );
+
+
+    selectedDate =
+        cell.dataset.date;
+
+    openCellMenu(
+        event.clientX,
+        event.clientY
+    );
+}
+
+
+
+function openCellMenu(
+    x,
+    y
+) {
+
+    const menu =
+        document.getElementById(
+            'cellMenu'
+        );
+
+
+    menu.innerHTML =
+        '';
+
+
+    shifts.forEach(
+        shift => {
+
+            const button =
+                document.createElement(
+                    'button'
+                );
+
+
+            button.textContent =
+                shift.code +
+                ' - ' +
+                shift.name;
+
+
+            button.onclick =
+                function(event) {
+
+                    event.stopPropagation();
+
+                    saveCell(
+                        shift.id
+                    );
+                };
+
+
+            menu.appendChild(
+                button
+            );
+        }
+    );
+
+
+    menu.style.display =
+        'block';
+
+
+    if (
+        x + 220 >
+        window.innerWidth
+    ) {
+
+        x =
+            window.innerWidth -
+            230;
+    }
+
+
+    menu.style.left =
+        x + 'px';
+
+    menu.style.top =
+        y + 'px';
+}
+
+
+
+function closeCellMenu() {
+
+    document
+        .getElementById(
+            'cellMenu'
+        )
+        .style.display =
+            'none';
+}
+
+
+
+document.addEventListener(
+    'click',
+    closeCellMenu
+);
+
+
+
+async function saveCell(
+    shiftId
+) {
+
+    closeCellMenu();
+
+
+    const shift =
+        findShift(
+            shiftId
+        );
+
+
+    /*
+       Предварителна проверка 160 часа.
+    */
+
+    if (
+        shift &&
+        (
+            shift.type === 'work' ||
+            shift.type === 'duty'
+        )
+    ) {
+
+        const currentStats =
+            calculateStats(
+                selectedWorkerId,
+                Number(
+                    selectedDate.substring(
+                        0,
+                        4
+                    )
+                ),
+                Number(
+                    selectedDate.substring(
+                        5,
+                        7
+                    )
+                )
+            );
+
+
+        const oldEntry =
+            findEntry(
+                selectedWorkerId,
+                selectedDate
+            );
+
+
+        let projectedHours =
+            currentStats.hours;
+
+
+        if (oldEntry) {
+
+            const oldShift =
+                findShift(
+                    oldEntry.shift_id
+                );
+
+
+            if (
+                oldShift &&
+                (
+                    oldShift.type === 'work' ||
+                    oldShift.type === 'duty'
+                )
+            ) {
+
+                projectedHours -=
+                    calculateShiftHours(
+                        oldShift.time_from,
+                        oldShift.time_to
+                    );
+            }
+        }
+
+
+        projectedHours +=
+            calculateShiftHours(
+                shift.time_from,
+                shift.time_to
+            );
+
+
+        if (
+            projectedHours > 160
+        ) {
+
+            alert(
+                'Служителят ще надвиши 160 часа.\n\n' +
+                'Прогнозни часове: ' +
+                formatHours(
+                    projectedHours
+                ) +
+                '\n\nНеобходимо е да се добави друг служител.'
+            );
+
+            return;
+        }
+    }
+
+
+    const response =
+        await fetch(
+            '/staff-compat-api.php/api/forecasts/' +
+            objectId +
+            '/entry',
+            {
+                method:
+                    'PUT',
+
+                credentials:
+                    'same-origin',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body:
+                    JSON.stringify({
+
+                        forecast_id:
+                            forecast.id,
+
+                        forecast_worker_id:
+                            selectedWorkerId,
+
+                        work_date:
+                            selectedDate,
+
+                        shift_id:
+                            shiftId,
+
+                        note:
+                            ''
+                    })
+            }
+        );
+
+
+    const data =
+        await response
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!response.ok) {
+
+        showError(
+            data.error ||
+            'Грешка при запис'
+        );
+
+        return;
+    }
+
+
+    await loadForecast(
+        true
+    );
+}
+
+
+
+function calculateStats(
+    workerId,
+    year,
+    month
+) {
+
+    let workDays = 0;
+    let hours = 0;
+    let nightHours = 0;
+    let holidayHours = 0;
+    let duties = 0;
+    let vacation = 0;
+    let sick = 0;
+
+
+    entries.forEach(
+        entry => {
+
+            if (
+                Number(
+                    entry.forecast_worker_id
+                ) !==
+                Number(
+                    workerId
+                )
+            ) {
+                return;
+            }
+
+
+            const date =
+                normalizeDate(
+                    entry.work_date
+                );
+
+
+            if (
+                Number(
+                    date.substring(
+                        0,
+                        4
+                    )
+                ) !== year ||
+
+                Number(
+                    date.substring(
+                        5,
+                        7
+                    )
+                ) !== month
+            ) {
+
+                return;
+            }
+
+
+            const shift =
+                findShift(
+                    entry.shift_id
+                );
+
+
+            if (!shift) {
+                return;
+            }
+
+
+            if (
+                Number(
+                    shift.counts_as_work_day
+                ) === 1
+            ) {
+
+                workDays++;
+            }
+
+
+            if (
+                shift.type === 'work' ||
+                shift.type === 'duty'
+            ) {
+
+                hours +=
+                    calculateShiftHours(
+                        shift.time_from,
+                        shift.time_to
+                    );
+
+                nightHours +=
+                    calculateNightHours(
+                        shift.time_from,
+                        shift.time_to
+                    );
+
+                holidayHours +=
+                    calculateHolidayHours(
+                        date,
+                        shift.time_from,
+                        shift.time_to
+                    );
+            }
+
+
+            if (
+                shift.type === 'duty'
+            ) {
+                duties++;
+            }
+
+
+            if (
+                shift.type === 'vacation'
+            ) {
+                vacation++;
+            }
+
+
+            if (
+                shift.type === 'sick'
+            ) {
+                sick++;
+            }
+        }
+    );
+
+
+    return {
+        workDays,
+        hours,
+        nightHours,
+        holidayHours,
+        duties,
+        vacation,
+        sick
+    };
+}
+
+
+
+
+
+function calculateNightHours(
+    timeFrom,
+    timeTo
+) {
+
+    if (
+        !timeFrom ||
+        !timeTo
+    ) {
+        return 0;
+    }
+
+
+    const start =
+        timeToMinutes(
+            timeFrom
+        );
+
+
+    let end =
+        timeToMinutes(
+            timeTo
+        );
+
+
+    if (
+        end <= start
+    ) {
+        end +=
+            24 * 60;
+    }
+
+
+    let total = 0;
+
+
+    /*
+       Нощен труд:
+       22:00 - 06:00
+
+       Проверяваме два нощни прозореца,
+       за да покрием смяна през полунощ.
+    */
+
+    const windows = [
+        [22 * 60, 30 * 60],
+        [-2 * 60, 6 * 60]
+    ];
+
+
+    for (
+        const [nightStart, nightEnd]
+        of windows
+    ) {
+
+        const overlapStart =
+            Math.max(
+                start,
+                nightStart
+            );
+
+
+        const overlapEnd =
+            Math.min(
+                end,
+                nightEnd
+            );
+
+
+        if (
+            overlapEnd >
+            overlapStart
+        ) {
+
+            total +=
+                overlapEnd -
+                overlapStart;
+        }
+    }
+
+
+    return total / 60;
+}
+
+
+function calculateHolidayHours(
+    workDate,
+    timeFrom,
+    timeTo
+) {
+
+    if (
+        !workDate ||
+        !timeFrom ||
+        !timeTo
+    ) {
+        return 0;
+    }
+
+
+    const start =
+        timeToMinutes(
+            timeFrom
+        );
+
+
+    let end =
+        timeToMinutes(
+            timeTo
+        );
+
+
+    const overnight =
+        end <= start;
+
+
+    let total = 0;
+
+
+    // =========================================
+    // Първи календарен ден
+    // =========================================
+
+    const firstEnd =
+        overnight
+            ? 24 * 60
+            : end;
+
+
+    const firstMinutes =
+        Math.max(
+            0,
+            firstEnd - start
+        );
+
+
+    const firstCalendarDay =
+        workCalendarDays.find(
+            item =>
+                item.work_date ===
+                workDate
+        );
+
+
+    if (
+        firstCalendarDay &&
+        Number(
+            firstCalendarDay.is_holiday
+        ) === 1
+    ) {
+
+        total +=
+            firstMinutes / 60;
+    }
+
+
+    // =========================================
+    // Следващ календарен ден
+    // =========================================
+
+    if (overnight) {
+
+        const parts =
+            workDate.split('-');
+
+
+        const nextDate =
+            new Date(
+                Number(parts[0]),
+                Number(parts[1]) - 1,
+                Number(parts[2]) + 1
+            );
+
+
+        const nextDateString =
+            nextDate.getFullYear() +
+            '-' +
+            String(
+                nextDate.getMonth() + 1
+            ).padStart(2, '0') +
+            '-' +
+            String(
+                nextDate.getDate()
+            ).padStart(2, '0');
+
+
+        const nextCalendarDay =
+            workCalendarDays.find(
+                item =>
+                    item.work_date ===
+                    nextDateString
+            );
+
+
+        if (
+            nextCalendarDay &&
+            Number(
+                nextCalendarDay.is_holiday
+            ) === 1
+        ) {
+
+            total +=
+                end / 60;
+        }
+    }
+
+
+    return total;
+}
+
+
+function calculateShiftHours(
+    timeFrom,
+    timeTo
+) {
+
+    if (
+        !timeFrom ||
+        !timeTo
+    ) {
+        return 0;
+    }
+
+
+    const from =
+        timeToMinutes(
+            timeFrom
+        );
+
+
+    let to =
+        timeToMinutes(
+            timeTo
+        );
+
+
+    if (
+        to <= from
+    ) {
+
+        to +=
+            24 * 60;
+    }
+
+
+    return (
+        to - from
+    ) / 60;
+}
+
+
+
+function timeToMinutes(
+    value
+) {
+
+    const parts =
+        String(value)
+            .split(':');
+
+
+    return (
+        Number(parts[0]) *
+        60
+    ) +
+    Number(parts[1]);
+}
+
+
+
+function findEntry(
+    workerId,
+    date
+) {
+
+    return entries.find(
+        entry =>
+            Number(
+                entry.forecast_worker_id
+            ) ===
+            Number(
+                workerId
+            ) &&
+
+            normalizeDate(
+                entry.work_date
+            ) ===
+            date
+    );
+}
+
+
+
+function findShift(
+    shiftId
+) {
+
+    return shifts.find(
+        shift =>
+            Number(
+                shift.id
+            ) ===
+            Number(
+                shiftId
+            )
+    );
+}
+
+
+
+function shiftClass(
+    type
+) {
+
+    switch (type) {
+
+        case 'work':
+            return 'shift-work';
+
+        case 'duty':
+            return 'shift-duty';
+
+        case 'off':
+            return 'shift-off';
+
+        case 'vacation':
+            return 'shift-vacation';
+
+        case 'sick':
+            return 'shift-sick';
+
+        default:
+            return '';
+    }
+}
+
+
+
+function renderLegend() {
+
+    const container =
+        document.getElementById(
+            'legend'
+        );
+
+
+    let html = '';
+
+
+    shifts.forEach(
+        shift => {
+
+            html +=
+                '<div class="legend-row">' +
+
+                '<span class="legend-code">' +
+                escapeHtml(
+                    shift.code
+                ) +
+                '</span>' +
+
+                escapeHtml(
+                    shift.name
+                ) +
+
+                (
+                    shift.time_from &&
+                    shift.time_to
+
+                        ? ' от ' +
+                          String(
+                              shift.time_from
+                          ).substring(
+                              0,
+                              5
+                          ) +
+                          'ч. до ' +
+                          String(
+                              shift.time_to
+                          ).substring(
+                              0,
+                              5
+                          ) +
+                          'ч.'
+
+                        : ''
+                ) +
+
+                '</div>';
+        }
+    );
+
+
+    container.innerHTML =
+        html;
+}
+
+
+
+function previousMonth() {
+
+    let month =
+        Number(
+            document
+                .getElementById(
+                    'monthSelect'
+                )
+                .value
+        );
+
+
+    let year =
+        Number(
+            document
+                .getElementById(
+                    'yearSelect'
+                )
+                .value
+        );
+
+
+    month--;
+
+
+    if (
+        month < 1
+    ) {
+
+        month = 12;
+        year--;
+    }
+
+
+    setMonthYear(
+        month,
+        year
+    );
+}
+
+
+
+function nextMonth() {
+
+    let month =
+        Number(
+            document
+                .getElementById(
+                    'monthSelect'
+                )
+                .value
+        );
+
+
+    let year =
+        Number(
+            document
+                .getElementById(
+                    'yearSelect'
+                )
+                .value
+        );
+
+
+    month++;
+
+
+    if (
+        month > 12
+    ) {
+
+        month = 1;
+        year++;
+    }
+
+
+    setMonthYear(
+        month,
+        year
+    );
+}
+
+
+
+function setMonthYear(
+    month,
+    year
+) {
+
+    const yearSelect =
+        document.getElementById(
+            'yearSelect'
+        );
+
+
+    if (
+        !Array
+            .from(
+                yearSelect.options
+            )
+            .some(
+                option =>
+                    Number(
+                        option.value
+                    ) ===
+                    year
+            )
+    ) {
+
+        const option =
+            document.createElement(
+                'option'
+            );
+
+        option.value =
+            year;
+
+        option.textContent =
+            year;
+
+        yearSelect.appendChild(
+            option
+        );
+    }
+
+
+    document
+        .getElementById(
+            'monthSelect'
+        )
+        .value =
+            month;
+
+
+    yearSelect.value =
+        year;
+
+
+    loadForecast();
+}
+
+
+
+function formatDate(
+    year,
+    month,
+    day
+) {
+
+    return (
+        year +
+        '-' +
+        String(month)
+            .padStart(
+                2,
+                '0'
+            ) +
+        '-' +
+        String(day)
+            .padStart(
+                2,
+                '0'
+            )
+    );
+}
+
+
+
+function normalizeDate(
+    value
+) {
+
+    if (!value) {
+        return '';
+    }
+
+    return String(value)
+        .substring(
+            0,
+            10
+        );
+}
+
+
+
+function formatHours(
+    value
+) {
+
+    return Number.isInteger(
+        value
+    )
+        ? value
+        : Number(value)
+            .toFixed(1);
+}
+
+
+
+async function apiFetch(
+    url
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                url,
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            window.location.href =
+                '/login.php';
+
+            return null;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'API грешка'
+            );
+        }
+
+
+        return data;
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+
+        return null;
+    }
+}
+
+
+
+function showError(
+    message
+) {
+
+    const box =
+        document.getElementById(
+            'error'
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.style.display =
+        'block';
+
+
+    setTimeout(
+        () => {
+
+            box.style.display =
+                'none';
+
+        },
+        7000
+    );
+}
+
+
+
+function escapeHtml(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return '';
+    }
+
+
+    return String(value)
+
+        .replaceAll(
+            '&',
+            '&amp;'
+        )
+
+        .replaceAll(
+            '<',
+            '&lt;'
+        )
+
+        .replaceAll(
+            '>',
+            '&gt;'
+        )
+
+        .replaceAll(
+            '"',
+            '&quot;'
+        )
+
+        .replaceAll(
+            "'",
+            '&#039;'
+        );
+}
+
+
+
+
+/* =====================================================
+   EXPORT FORECAST TO EXCEL
+===================================================== */
+
+function exportForecastExcel() {
+
+    if (
+        typeof XLSX ===
+        'undefined'
+    ) {
+
+        showError(
+            'Excel библиотеката не е заредена.'
+        );
+
+        return;
+    }
+
+
+    if (
+        !forecast ||
+        workers.length === 0
+    ) {
+
+        showError(
+            'Няма зареден прогнозен график.'
+        );
+
+        return;
+    }
+
+
+    const year =
+        Number(
+            forecast.year
+        );
+
+
+    const month =
+        Number(
+            forecast.month
+        );
+
+
+    const daysInMonth =
+        new Date(
+            year,
+            month,
+            0
+        ).getDate();
+
+
+    const rows = [];
+
+
+    rows.push([
+        'ПРОГНОЗЕН ГРАФИК'
+    ]);
+
+
+    rows.push([
+        currentObject
+            ? currentObject.name
+            : ''
+    ]);
+
+
+    rows.push([
+        'месец ' +
+        monthNames[month] +
+        ' ' +
+        year +
+        ' г.'
+    ]);
+
+
+    rows.push([]);
+
+
+    const weekdayRow = [
+        '',
+        ''
+    ];
+
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        const date =
+            new Date(
+                year,
+                month - 1,
+                day
+            );
+
+
+        weekdayRow.push(
+            weekdayNames[
+                date.getDay()
+            ]
+        );
+    }
+
+
+    rows.push(
+        weekdayRow
+    );
+
+
+    const header = [
+        '№',
+        'Служител'
+    ];
+
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        header.push(
+            day
+        );
+    }
+
+
+    rows.push(
+        header
+    );
+
+
+    workers.forEach(
+        (worker, index) => {
+
+            const row = [
+                index + 1,
+                worker.name
+            ];
+
+
+            for (
+                let day = 1;
+                day <= daysInMonth;
+                day++
+            ) {
+
+                const date =
+                    formatDate(
+                        year,
+                        month,
+                        day
+                    );
+
+
+                const entry =
+                    findEntry(
+                        worker.id,
+                        date
+                    );
+
+
+                const shift =
+                    entry
+                        ? findShift(
+                            entry.shift_id
+                        )
+                        : null;
+
+
+                row.push(
+                    shift
+                        ? shift.code
+                        : ''
+                );
+            }
+
+
+            rows.push(
+                row
+            );
+        }
+    );
+
+
+    const ws =
+        XLSX.utils.aoa_to_sheet(
+            rows
+        );
+
+
+    const totalColumns =
+        2 +
+        daysInMonth;
+
+
+    ws['!merges'] = [
+
+        {
+            s: {
+                r: 0,
+                c: 0
+            },
+
+            e: {
+                r: 0,
+                c: totalColumns - 1
+            }
+        },
+
+        {
+            s: {
+                r: 1,
+                c: 0
+            },
+
+            e: {
+                r: 1,
+                c: totalColumns - 1
+            }
+        },
+
+        {
+            s: {
+                r: 2,
+                c: 0
+            },
+
+            e: {
+                r: 2,
+                c: totalColumns - 1
+            }
+        }
+    ];
+
+
+    const cols = [
+
+        {
+            wch: 4
+        },
+
+        {
+            wch: 24
+        }
+    ];
+
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        cols.push({
+            wch: 4
+        });
+    }
+
+
+    ws['!cols'] =
+        cols;
+
+
+    ws['!rows'] =
+        rows.map(
+            (_, index) => {
+
+                if (
+                    index === 0
+                ) {
+                    return {
+                        hpt: 26
+                    };
+                }
+
+
+                if (
+                    index === 1 ||
+                    index === 2
+                ) {
+                    return {
+                        hpt: 20
+                    };
+                }
+
+
+                if (
+                    index === 3
+                ) {
+                    return {
+                        hpt: 8
+                    };
+                }
+
+
+                return {
+                    hpt: 24
+                };
+            }
+        );
+
+
+    const colors = {
+
+        header:
+            'E7E5DF',
+
+        weekend:
+            'EEEEEE',
+
+        work:
+            'DCEFE2',
+
+        duty:
+            'FFF0C9',
+
+        off:
+            'F3F3F3',
+
+        vacation:
+            'DDEBFF',
+
+        sick:
+            'FFDCDC',
+
+        extra:
+            'FFF4CC',
+
+        border:
+            '777777'
+    };
+
+
+    const border = {
+
+        top: {
+            style: 'thin',
+            color: {
+                rgb: colors.border
+            }
+        },
+
+        bottom: {
+            style: 'thin',
+            color: {
+                rgb: colors.border
+            }
+        },
+
+        left: {
+            style: 'thin',
+            color: {
+                rgb: colors.border
+            }
+        },
+
+        right: {
+            style: 'thin',
+            color: {
+                rgb: colors.border
+            }
+        }
+    };
+
+
+    ['A1', 'A2', 'A3'].forEach(
+        (address, index) => {
+
+            if (!ws[address]) {
+                return;
+            }
+
+
+            ws[address].s = {
+
+                font: {
+                    bold: true,
+                    sz:
+                        index === 0
+                            ? 17
+                            : 12
+                },
+
+                alignment: {
+                    horizontal:
+                        'center',
+                    vertical:
+                        'center'
+                }
+            };
+        }
+    );
+
+
+    /*
+       Таблицата започва от Excel row 5 / zero-based 4
+    */
+
+    for (
+        let r = 4;
+        r < rows.length;
+        r++
+    ) {
+
+        for (
+            let c = 0;
+            c < totalColumns;
+            c++
+        ) {
+
+            const address =
+                XLSX.utils.encode_cell({
+                    r,
+                    c
+                });
+
+
+            if (!ws[address]) {
+
+                ws[address] = {
+                    t: 's',
+                    v: ''
+                };
+            }
+
+
+            ws[address].s = {
+
+                border,
+
+                alignment: {
+                    horizontal:
+                        c === 1
+                            ? 'left'
+                            : 'center',
+
+                    vertical:
+                        'center',
+
+                    wrapText:
+                        true
+                },
+
+                font: {
+                    sz: 10
+                }
+            };
+        }
+    }
+
+
+    /*
+       Weekday + day header
+    */
+
+    for (
+        let c = 0;
+        c < totalColumns;
+        c++
+    ) {
+
+        [4, 5].forEach(
+            r => {
+
+                const address =
+                    XLSX.utils.encode_cell({
+                        r,
+                        c
+                    });
+
+
+                ws[address].s = {
+
+                    border,
+
+                    font: {
+                        bold: true,
+                        sz: 9
+                    },
+
+                    fill: {
+                        patternType:
+                            'solid',
+
+                        fgColor: {
+                            rgb:
+                                colors.header
+                        }
+                    },
+
+                    alignment: {
+                        horizontal:
+                            'center',
+                        vertical:
+                            'center',
+                        wrapText:
+                            true
+                    }
+                };
+            }
+        );
+    }
+
+
+    /*
+       Weekend columns
+    */
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        const date =
+            new Date(
+                year,
+                month - 1,
+                day
+            );
+
+
+        const weekend =
+            date.getDay() === 0 ||
+            date.getDay() === 6;
+
+
+        if (!weekend) {
+            continue;
+        }
+
+
+        const column =
+            day + 1;
+
+
+        for (
+            let r = 4;
+            r < rows.length;
+            r++
+        ) {
+
+            const address =
+                XLSX.utils.encode_cell({
+                    r,
+                    c: column
+                });
+
+
+            ws[address].s = {
+                ...ws[address].s,
+
+                fill: {
+                    patternType:
+                        'solid',
+
+                    fgColor: {
+                        rgb:
+                            colors.weekend
+                    }
+                }
+            };
+        }
+    }
+
+
+    /*
+       Shift colors
+    */
+
+    const firstWorkerRow =
+        6;
+
+
+    workers.forEach(
+        (worker, workerIndex) => {
+
+            const excelRow =
+                firstWorkerRow +
+                workerIndex;
+
+
+            for (
+                let day = 1;
+                day <= daysInMonth;
+                day++
+            ) {
+
+                const date =
+                    formatDate(
+                        year,
+                        month,
+                        day
+                    );
+
+
+                const entry =
+                    findEntry(
+                        worker.id,
+                        date
+                    );
+
+
+                if (!entry) {
+                    continue;
+                }
+
+
+                const shift =
+                    findShift(
+                        entry.shift_id
+                    );
+
+
+                if (!shift) {
+                    continue;
+                }
+
+
+                let color = null;
+
+
+                switch (
+                    shift.type
+                ) {
+
+                    case 'work':
+                        color =
+                            colors.work;
+                        break;
+
+                    case 'duty':
+                        color =
+                            colors.duty;
+                        break;
+
+                    case 'off':
+                        color =
+                            colors.off;
+                        break;
+
+                    case 'vacation':
+                        color =
+                            colors.vacation;
+                        break;
+
+                    case 'sick':
+                        color =
+                            colors.sick;
+                        break;
+                }
+
+
+                const address =
+                    XLSX.utils.encode_cell({
+                        r: excelRow,
+                        c: day + 1
+                    });
+
+
+                if (
+                    color &&
+                    ws[address]
+                ) {
+
+                    ws[address].s = {
+                        ...ws[address].s,
+
+                        fill: {
+                            patternType:
+                                'solid',
+
+                            fgColor: {
+                                rgb:
+                                    color
+                            }
+                        },
+
+                        font: {
+                            bold: true,
+                            sz: 10
+                        }
+                    };
+                }
+            }
+
+
+            /*
+               Допълнително добавен служител
+            */
+
+            if (
+                Number(
+                    worker.is_extra
+                ) === 1
+            ) {
+
+                for (
+                    let c = 0;
+                    c < 2;
+                    c++
+                ) {
+
+                    const address =
+                        XLSX.utils.encode_cell({
+                            r: excelRow,
+                            c
+                        });
+
+
+                    ws[address].s = {
+                        ...ws[address].s,
+
+                        fill: {
+                            patternType:
+                                'solid',
+
+                            fgColor: {
+                                rgb:
+                                    colors.extra
+                            }
+                        },
+
+                        font: {
+                            bold: true
+                        }
+                    };
+                }
+            }
+        }
+    );
+
+
+    ws['!margins'] = {
+        left: 0.2,
+        right: 0.2,
+        top: 0.3,
+        bottom: 0.3,
+        header: 0.1,
+        footer: 0.1
+    };
+
+
+    ws['!pageSetup'] = {
+        orientation:
+            'landscape',
+
+        fitToWidth:
+            1,
+
+        fitToHeight:
+            0,
+
+        paperSize:
+            9
+    };
+
+
+    const wb =
+        XLSX.utils.book_new();
+
+
+    XLSX.utils.book_append_sheet(
+        wb,
+        ws,
+        'Прогнозен график'
+    );
+
+
+    const filename =
+        'Prognozen_Grafik_' +
+        String(month)
+            .padStart(
+                2,
+                '0'
+            ) +
+        '_' +
+        year +
+        '.xlsx';
+
+
+    XLSX.writeFile(
+        wb,
+        filename
+    );
+}
+
+
+function goBack() {
+
+    window.location.href =
+        'obekti.html';
+}
+
+</script>
+
+</body>
+</html>
+
+<style>
+/* STAT FONT - SAME AS grafik.html */
+.stats-head {
+    min-width: 70px !important;
+    padding: 4px 5px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+}
+
+.stat-cell {
+    min-width: 70px !important;
+    padding: 4px 5px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: normal !important;
+}
+</style>
+
+<style>
+
+/* =====================================================
+   FINAL STATS VISUAL SYNC WITH grafik.html
+===================================================== */
+
+.stats-head {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+
+    padding: 4px 5px !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    white-space: normal !important;
+    line-height: normal !important;
+}
+
+.stat-cell {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+
+    padding: 4px 5px !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: normal !important;
+
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    white-space: nowrap !important;
+    line-height: normal !important;
+}
+
+/* Същата височина на реда като основния график */
+tbody .stat-cell {
+    height: 36px !important;
+    box-sizing: border-box !important;
+}
+
+/* Граници като основния график */
+.stats-head,
+.stat-cell {
+    border: 1px solid #8f959b !important;
+    box-sizing: border-box !important;
+}
+
+</style>
+
+<style>
+
+/* COMPACT STATISTICS COLUMNS */
+#tableWrapper .stats-head,
+#tableWrapper .stat-cell {
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+}
+
+#tableWrapper .stats-head {
+    font-size: 9px !important;
+    line-height: 11px !important;
+}
+
+#tableWrapper .stat-cell {
+    font-size: 12px !important;
+    white-space: nowrap !important;
+}
+
+</style>
+
+<style>
+
+/* EXTRA COMPACT STATISTICS */
+#tableWrapper .stats-head,
+#tableWrapper .stat-cell {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    padding-left: 1px !important;
+    padding-right: 1px !important;
+    box-sizing: border-box !important;
+}
+
+#tableWrapper .stats-head {
+    font-size: 8px !important;
+    line-height: 9px !important;
+    white-space: normal !important;
+}
+
+#tableWrapper .stat-cell {
+    font-size: 11px !important;
+    white-space: nowrap !important;
+}
+
+</style>
+
+<style>
+
+/* RESTORE STATISTICS TO 46px */
+#tableWrapper .stats-head,
+#tableWrapper .stat-cell {
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    box-sizing: border-box !important;
+}
+
+#tableWrapper .stats-head {
+    font-size: 9px !important;
+    line-height: 11px !important;
+    white-space: normal !important;
+}
+
+#tableWrapper .stat-cell {
+    font-size: 12px !important;
+    white-space: nowrap !important;
+}
+
+</style>
+
+<style>
+
+/* RESTORE ORIGINAL STATISTICS SIZE */
+#tableWrapper .stats-head,
+#tableWrapper .stat-cell {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    box-sizing: border-box !important;
+}
+
+#tableWrapper .stats-head {
+    padding: 4px 5px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+    line-height: 12px !important;
+    white-space: normal !important;
+}
+
+#tableWrapper .stat-cell {
+    padding: 4px 5px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: normal !important;
+    white-space: nowrap !important;
+}
+
+</style>
+
+<style>
+
+/* STATISTICS = SAME WIDTH AS SHIFT CELLS */
+#tableWrapper .stats-head,
+#tableWrapper .stat-cell {
+    width: 35px !important;
+    min-width: 35px !important;
+    max-width: 35px !important;
+    box-sizing: border-box !important;
+    padding-left: 1px !important;
+    padding-right: 1px !important;
+}
+
+#tableWrapper .stats-head {
+    font-size: 8px !important;
+    line-height: 9px !important;
+    white-space: normal !important;
+}
+
+#tableWrapper .stat-cell {
+    height: 36px !important;
+    font-size: 11px !important;
+    font-weight: normal !important;
+    white-space: nowrap !important;
+}
+
+</style>
+
+<style>
+
+/* FORCE STATS TO SAME WIDTH AS SHIFT CELLS */
+#tableWrapper th.stats-head,
+#tableWrapper td.stat-cell {
+    width: 35px !important;
+    min-width: 35px !important;
+    max-width: 35px !important;
+    padding: 1px !important;
+    box-sizing: border-box !important;
+}
+
+#tableWrapper th.stats-head {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    font-size: 8px !important;
+    line-height: 9px !important;
+}
+
+#tableWrapper td.stat-cell {
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    overflow: hidden !important;
+}
+
+</style>
+
+<style>
+#tableWrapper th.stats-head,
+#tableWrapper td.stat-cell {
+    width: 35px !important;
+    min-width: 35px !important;
+    max-width: 35px !important;
+    padding: 1px !important;
+    box-sizing: border-box !important;
+}
+
+#tableWrapper th.stats-head {
+    font-size: 8px !important;
+    line-height: 9px !important;
+    white-space: normal !important;
+}
+
+#tableWrapper td.stat-cell {
+    font-size: 11px !important;
+    white-space: nowrap !important;
+}
+
+
+/* =====================================================
+   FINAL FORECAST STATISTICS STYLE
+   Единствен окончателен размер: 35px
+===================================================== */
+
+.stats-head,
+.stat-cell {
+    width: 35px !important;
+    min-width: 35px !important;
+    max-width: 35px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.stats-head {
+    padding: 2px 1px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 9px !important;
+    font-weight: bold !important;
+    line-height: 10px !important;
+    white-space: normal !important;
+}
+
+.stat-cell {
+    height: 36px !important;
+    padding: 1px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: normal !important;
+    line-height: normal !important;
+    white-space: nowrap !important;
+}
+
+
+</style>
+
+<style>
+
+/* BOLD VALUES IN STAT CELLS */
+.stat-cell {
+    font-weight: 700 !important;
+}
+
+</style>

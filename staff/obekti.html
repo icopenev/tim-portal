@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Обекти | График</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f3f4f6;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #222;
+}
+
+header {
+    background: #252b31;
+    color: white;
+    padding: 14px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 21px;
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.logout-btn,
+.users-btn {
+    border: 1px solid #777;
+    background: transparent;
+    color: white;
+    padding: 7px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.logout-btn:hover,
+.users-btn:hover {
+    background: #444;
+}
+
+.users-btn {
+    display: none;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.toolbar h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.add-btn {
+    border: 0;
+    background: #252b31;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.add-btn:hover {
+    background: #111;
+}
+
+.objects {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
+}
+
+.card {
+    background: white;
+    border: 1px solid #d4d7da;
+    border-radius: 6px;
+    padding: 20px;
+    box-shadow: 0 2px 7px rgba(0,0,0,.05);
+}
+
+.card h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+}
+
+.description {
+    min-height: 35px;
+    color: #666;
+    font-size: 14px;
+}
+
+.info {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+    font-size: 13px;
+    color: #555;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.actions button {
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #aaa;
+    background: #fff;
+}
+
+.actions .schedule {
+    background: #252b31;
+    color: white;
+    border-color: #252b31;
+}
+
+.actions .delete {
+    color: #a32121;
+}
+
+.empty {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 30px;
+    text-align: center;
+    color: #777;
+}
+
+#error {
+    display: none;
+    background: #fbeaea;
+    border: 1px solid #dfaaaa;
+    color: #9c2020;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 18px;
+}
+
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    width: 430px;
+    max-width: calc(100% - 30px);
+    background: white;
+    border-radius: 6px;
+    padding: 25px;
+}
+
+.modal h3 {
+    margin-top: 0;
+}
+
+.field {
+    margin-bottom: 15px;
+}
+
+.field label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.field input,
+.field textarea {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.field textarea {
+    height: 80px;
+    resize: vertical;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.modal-actions button {
+    padding: 9px 15px;
+    cursor: pointer;
+}
+
+.save {
+    background: #252b31;
+    color: white;
+    border: 0;
+    border-radius: 4px;
+}
+
+.cancel {
+    background: white;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+</style>
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>ГРАФИК</h1>
+
+    <div class="user-area">
+
+        <!-- Вижда се само от ADMIN -->
+        <button
+            id="usersButton"
+            class="users-btn"
+            onclick="openUsers()"
+        >
+            Потребители
+        </button>
+
+        <span id="userName"></span>
+
+        <button
+            class="logout-btn"
+            onclick="logout()"
+        >
+            Изход
+        </button>
+
+    </div>
+
+</header>
+
+
+<div class="container">
+
+    <div class="toolbar">
+
+        <h2>Обекти</h2>
+
+        <div style="display:flex; gap:8px; align-items:center;">
+
+            <button
+                class="add-btn"
+                onclick="window.location.href='spravka.html'">
+                Справка по служител
+            </button>
+
+            <!-- Вижда се само от ADMIN -->
+            <button
+                id="addButton"
+                class="add-btn"
+                onclick="newObject()"
+                style="display:none"
+            >
+                + Нов обект
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div id="error"></div>
+
+
+    <div
+        id="objects"
+        class="objects"
+    ></div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MODAL - ОБЕКТ
+===================================================== -->
+
+<div
+    id="modalBg"
+    class="modal-bg"
+>
+
+    <div class="modal">
+
+        <h3 id="modalTitle">
+            Нов обект
+        </h3>
+
+
+        <input
+            type="hidden"
+            id="objectId"
+        >
+
+
+        <div class="field">
+
+            <label>
+                Име на обекта
+            </label>
+
+            <input
+                id="objectName"
+                type="text"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Описание
+            </label>
+
+            <textarea
+                id="objectDescription"
+            ></textarea>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                class="cancel"
+                onclick="closeModal()"
+            >
+                Отказ
+            </button>
+
+
+            <button
+                class="save"
+                onclick="saveObject()"
+            >
+                Запази
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+let currentUser = null;
+let objects = [];
+
+
+// =====================================================
+// START
+// =====================================================
+
+init();
+
+
+async function init() {
+
+    const ok =
+        await loadCurrentUser();
+
+    if (!ok) {
+        return;
+    }
+
+    await loadObjects();
+}
+
+
+
+// =====================================================
+// CURRENT USER
+// =====================================================
+
+async function loadCurrentUser() {
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/auth/me',
+                {
+                    credentials: 'same-origin'
+                }
+            );
+
+
+        if (response.status === 401) {
+
+            window.location.href =
+                '/login.php';
+
+            return false;
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                'Грешка при проверка на сесията'
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        currentUser =
+            data.user;
+
+
+        document
+            .getElementById('userName')
+            .textContent =
+                currentUser.full_name +
+                ' (' +
+                currentUser.username +
+                ')';
+
+
+        // =============================================
+        // ADMIN CONTROLS
+        // =============================================
+
+        if ((currentUser.role === 'admin' || currentUser.role === 'supervisor')) {
+
+            document
+                .getElementById('addButton')
+                .style.display =
+                    'block';
+
+
+            document
+                .getElementById('usersButton')
+                .style.display =
+                    'inline-block';
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+
+        return false;
+    }
+}
+
+
+
+// =====================================================
+// LOAD OBJECTS
+// =====================================================
+
+async function loadObjects() {
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/objects',
+                {
+                    credentials: 'same-origin'
+                }
+            );
+
+
+        if (response.status === 401) {
+
+            window.location.href =
+                '/login.php';
+
+            return;
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                'Не могат да бъдат заредени обектите'
+            );
+        }
+
+
+        objects =
+            await response.json();
+
+
+        renderObjects();
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+    }
+}
+
+
+
+// =====================================================
+// RENDER OBJECTS
+// =====================================================
+
+function renderObjects() {
+
+    const container =
+        document.getElementById(
+            'objects'
+        );
+
+
+    container.innerHTML =
+        '';
+
+
+    if (objects.length === 0) {
+
+        container.innerHTML =
+            '<div class="empty">' +
+            'Нямате зададени обекти.' +
+            '</div>';
+
+        return;
+    }
+
+
+    objects.forEach(
+        object => {
+
+
+            const card =
+                document.createElement(
+                    'div'
+                );
+
+            card.className =
+                'card';
+
+
+
+            // =========================================
+            // NAME
+            // =========================================
+
+            const title =
+                document.createElement(
+                    'h3'
+                );
+
+            title.textContent =
+                object.name;
+
+            card.appendChild(
+                title
+            );
+
+
+
+            // =========================================
+            // DESCRIPTION
+            // =========================================
+
+            const description =
+                document.createElement(
+                    'div'
+                );
+
+            description.className =
+                'description';
+
+            description.textContent =
+                object.description ||
+                '';
+
+            card.appendChild(
+                description
+            );
+
+
+
+            // =========================================
+            // INFO
+            // =========================================
+
+            const info =
+                document.createElement(
+                    'div'
+                );
+
+            info.className =
+                'info';
+
+
+            info.textContent =
+                'Служители: ' +
+                (
+                    object.employee_count ||
+                    0
+                );
+
+
+            card.appendChild(
+                info
+            );
+
+
+
+            // =========================================
+            // ACTIONS
+            // =========================================
+
+            const actions =
+                document.createElement(
+                    'div'
+                );
+
+            actions.className =
+                'actions';
+
+
+
+            // =========================================
+            // ГРАФИК
+            // =========================================
+
+            const scheduleButton =
+                document.createElement(
+                    'button'
+                );
+
+
+            scheduleButton.className =
+                'schedule';
+
+
+            scheduleButton.textContent =
+                'График';
+
+
+            scheduleButton.onclick =
+                function() {
+
+                    window.location.href =
+                        'grafik.html?object=' +
+                        object.id;
+                };
+
+
+            actions.appendChild(
+                scheduleButton
+            );
+
+
+            // =========================================
+            // FORECAST SCHEDULE BUTTON
+            // =========================================
+
+            const forecastButton =
+                document.createElement(
+                    'button'
+                );
+
+
+            forecastButton.className =
+                'schedule';
+
+
+            forecastButton.textContent =
+                'Прогнозен график';
+
+
+            forecastButton.onclick =
+                function() {
+
+                    window.location.href =
+                        'prognozen.html?object=' +
+                        object.id;
+                };
+
+
+            actions.appendChild(
+                forecastButton
+            );
+
+
+            // =========================================
+            // ACCOUNTING / REPORTED SCHEDULE BUTTON
+            // =========================================
+
+            const reportedButton =
+                document.createElement(
+                    'button'
+                );
+
+
+            reportedButton.className =
+                'schedule';
+
+
+            reportedButton.textContent =
+                'Отчетен график';
+
+
+            reportedButton.onclick =
+                function() {
+
+                    window.location.href =
+                        'otcheten.html?object=' +
+                        object.id;
+                };
+
+
+            actions.appendChild(
+                reportedButton
+            );
+
+
+
+            // =========================================
+            // ADMIN BUTTONS
+            // =========================================
+
+            if (
+                currentUser.role ===
+                'admin'
+            ) {
+
+
+                // EDIT
+
+                const editButton =
+                    document.createElement(
+                        'button'
+                    );
+
+
+                editButton.textContent =
+                    'Редакция';
+
+
+                editButton.onclick =
+                    function() {
+
+                        editObject(
+                            object
+                        );
+                    };
+
+
+                actions.appendChild(
+                    editButton
+                );
+
+
+
+                // DELETE
+
+                const deleteButton =
+                    document.createElement(
+                        'button'
+                    );
+
+
+                deleteButton.className =
+                    'delete';
+
+
+                deleteButton.textContent =
+                    'Изтрий';
+
+
+                deleteButton.onclick =
+                    function() {
+
+                        deleteObject(
+                            object
+                        );
+                    };
+
+
+                actions.appendChild(
+                    deleteButton
+                );
+            }
+
+
+            card.appendChild(
+                actions
+            );
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+}
+
+
+
+// =====================================================
+// OPEN USERS
+// =====================================================
+
+function openUsers() {
+
+    if (
+        !currentUser ||
+        (currentUser.role !== 'admin' && currentUser.role !== 'supervisor')
+    ) {
+        return;
+    }
+
+
+    window.location.href =
+        '/admin.php';
+}
+
+
+
+// =====================================================
+// NEW OBJECT
+// =====================================================
+
+function newObject() {
+
+    if (
+        !currentUser ||
+        (currentUser.role !== 'admin' && currentUser.role !== 'supervisor')
+    ) {
+        return;
+    }
+
+
+    document
+        .getElementById(
+            'modalTitle'
+        )
+        .textContent =
+            'Нов обект';
+
+
+    document
+        .getElementById(
+            'objectId'
+        )
+        .value =
+            '';
+
+
+    document
+        .getElementById(
+            'objectName'
+        )
+        .value =
+            '';
+
+
+    document
+        .getElementById(
+            'objectDescription'
+        )
+        .value =
+            '';
+
+
+    document
+        .getElementById(
+            'modalBg'
+        )
+        .style.display =
+            'flex';
+
+
+    document
+        .getElementById(
+            'objectName'
+        )
+        .focus();
+}
+
+
+
+// =====================================================
+// EDIT OBJECT
+// =====================================================
+
+function editObject(object) {
+
+    if (
+        !currentUser ||
+        (currentUser.role !== 'admin' && currentUser.role !== 'supervisor')
+    ) {
+        return;
+    }
+
+
+    document
+        .getElementById(
+            'modalTitle'
+        )
+        .textContent =
+            'Редакция на обект';
+
+
+    document
+        .getElementById(
+            'objectId'
+        )
+        .value =
+            object.id;
+
+
+    document
+        .getElementById(
+            'objectName'
+        )
+        .value =
+            object.name;
+
+
+    document
+        .getElementById(
+            'objectDescription'
+        )
+        .value =
+            object.description ||
+            '';
+
+
+    document
+        .getElementById(
+            'modalBg'
+        )
+        .style.display =
+            'flex';
+}
+
+
+
+// =====================================================
+// CLOSE MODAL
+// =====================================================
+
+function closeModal() {
+
+    document
+        .getElementById(
+            'modalBg'
+        )
+        .style.display =
+            'none';
+}
+
+
+
+// =====================================================
+// SAVE OBJECT
+// =====================================================
+
+async function saveObject() {
+
+    if (
+        !currentUser ||
+        (currentUser.role !== 'admin' && currentUser.role !== 'supervisor')
+    ) {
+        return;
+    }
+
+
+    const id =
+        document
+            .getElementById(
+                'objectId'
+            )
+            .value;
+
+
+    const name =
+        document
+            .getElementById(
+                'objectName'
+            )
+            .value
+            .trim();
+
+
+    const description =
+        document
+            .getElementById(
+                'objectDescription'
+            )
+            .value
+            .trim();
+
+
+    if (!name) {
+
+        alert(
+            'Въведете име на обекта.'
+        );
+
+        return;
+    }
+
+
+    let url =
+        '/staff-compat-api.php/api/objects';
+
+    let method =
+        'POST';
+
+
+    if (id) {
+
+        url =
+            '/staff-compat-api.php/api/objects/' +
+            id;
+
+        method =
+            'PUT';
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                url,
+                {
+
+                    method:
+                        method,
+
+                    credentials:
+                        'same-origin',
+
+                    headers: {
+                        'Content-Type':
+                            'application/json'
+                    },
+
+                    body:
+                        JSON.stringify(
+                            {
+                                name:
+                                    name,
+
+                                description:
+                                    description,
+
+                                active:
+                                    1
+                            }
+                        )
+                }
+            );
+
+
+        if (
+            response.status ===
+            401
+        ) {
+
+            window.location.href =
+                '/login.php';
+
+            return;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при запис'
+            );
+        }
+
+
+        closeModal();
+
+
+        await loadObjects();
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+    }
+}
+
+
+
+// =====================================================
+// DELETE OBJECT
+// =====================================================
+
+async function deleteObject(object) {
+
+    if (
+        !currentUser ||
+        (currentUser.role !== 'admin' && currentUser.role !== 'supervisor')
+    ) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            'Сигурни ли сте, че искате да изтриете "' +
+            object.name +
+            '"?\n\n' +
+            'Ще бъдат изтрити служителите, смените и графиците към този обект.'
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/objects/' +
+                object.id,
+                {
+                    method:
+                        'DELETE',
+
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при изтриване'
+            );
+        }
+
+
+        await loadObjects();
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+    }
+}
+
+
+
+// =====================================================
+// LOGOUT
+// =====================================================
+
+async function logout() {
+
+    try {
+
+        await fetch(
+            '/staff-compat-api.php/api/auth/logout',
+            {
+                method:
+                    'POST',
+
+                credentials:
+                    'same-origin'
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+    }
+
+
+    window.location.href =
+        '/login.php';
+}
+
+
+
+// =====================================================
+// ERROR
+// =====================================================
+
+function showError(message) {
+
+    const box =
+        document.getElementById(
+            'error'
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.style.display =
+        'block';
+}
+
+
+
+// =====================================================
+// ESC CLOSE MODAL
+// =====================================================
+
+document.addEventListener(
+    'keydown',
+    function(event) {
+
+        if (
+            event.key ===
+            'Escape'
+        ) {
+
+            closeModal();
+        }
+    }
+);
+
+</script>
+
+</body>
+</html>

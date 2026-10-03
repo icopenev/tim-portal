@@ -1,0 +1,43 @@
+# Local configuration / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Runtime databases and state
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# Backups / temporary files
+*.bak
+*.bak-*
+*.broken-*
+*.old
+*.orig
+*~
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Logs / runtime
+*.log
+logs/
+tmp/
+cache/
+sessions/
+
+# User/generated uploads
+uploads/
+storage/
+data/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

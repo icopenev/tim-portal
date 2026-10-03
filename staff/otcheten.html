@@ -1,0 +1,9042 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Отчетен график</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f3f4f6;
+    color: #1f2933;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.topbar {
+    background: #252b31;
+    color: #fff;
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.topbar-left,
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar h1 {
+    margin: 0;
+    font-size: 19px;
+}
+
+button {
+    cursor: pointer;
+}
+
+.topbar button {
+    border: 1px solid #697078;
+    background: #343b42;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.topbar button:hover {
+    background: #484f56;
+}
+
+.container {
+    padding: 20px;
+}
+
+.header-box {
+    background: #fff;
+    border: 1px solid #cfd3d7;
+    margin-bottom: 14px;
+    padding: 16px;
+}
+
+.title {
+    text-align: center;
+}
+
+.title h2 {
+    margin: 0;
+    font-size: 25px;
+    letter-spacing: 2px;
+}
+
+.department {
+    margin-top: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.month-title {
+    margin-top: 5px;
+    font-size: 15px;
+}
+
+.controls {
+    margin-top: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.controls select,
+.controls button {
+    height: 36px;
+    border: 1px solid #aeb4ba;
+    border-radius: 4px;
+    padding: 0 10px;
+    background: #fff;
+}
+
+.controls button {
+    font-weight: bold;
+}
+
+.controls .pdf-btn {
+    background: #252b31;
+    color: #fff;
+    border-color: #252b31;
+}
+
+.controls .employee-btn {
+    background: #2f6f4e;
+    color: white;
+    border-color: #2f6f4e;
+}
+
+.controls .shift-btn {
+    background: #495b6b;
+    color: white;
+    border-color: #495b6b;
+}
+
+.admin-badge {
+    background: #eceff1;
+    padding: 7px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+#error {
+    display: none;
+    background: #fbeaea;
+    color: #9b2020;
+    border: 1px solid #dda8a8;
+    padding: 10px;
+    margin-bottom: 12px;
+}
+
+.table-wrapper {
+    background: #fff;
+    border: 1px solid #b8bdc2;
+    overflow-x: auto;
+    width: 100%;
+}
+
+table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+    background: #fff;
+}
+
+th,
+td {
+    border: 1px solid #8f959b;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+}
+
+thead th {
+    background: #e8eaec;
+    font-weight: bold;
+}
+
+.num-head {
+    width: 34px;
+    min-width: 34px;
+}
+
+.employee-head {
+    min-width: 225px;
+    width: 225px;
+}
+
+.day-head {
+    width: 35px;
+    min-width: 35px;
+}
+
+.weekday {
+    display: block;
+    font-size: 10px;
+    padding-top: 4px;
+    color: #555;
+}
+
+.day-number {
+    display: block;
+    font-size: 13px;
+    padding: 3px 0 5px;
+}
+
+.employee-number {
+    width: 34px;
+    min-width: 34px;
+    font-size: 12px;
+}
+
+.employee-name {
+    min-width: 225px;
+    max-width: 225px;
+    text-align: left;
+    padding: 6px 7px;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.employee-row-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.employee-info {
+    overflow: hidden;
+}
+
+.employee-main-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.employee-position {
+    font-size: 10px;
+    font-weight: normal;
+    color: #666;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.employee-actions {
+    display: flex;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.employee-actions button {
+    border: 1px solid #b2b6ba;
+    background: #f5f5f5;
+    border-radius: 3px;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    font-size: 12px;
+}
+
+.employee-actions .delete {
+    color: #a32626;
+}
+
+.shift-cell {
+    width: 35px;
+    min-width: 35px;
+    height: 36px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.editor .shift-cell {
+    cursor: pointer;
+}
+
+.editor .shift-cell:hover {
+    outline: 2px solid #555;
+    outline-offset: -2px;
+}
+
+.weekend {
+    background: #f1f1f1 !important;
+}
+
+.shift-work {
+    background: transparent;
+}
+
+.shift-duty {
+    background: transparent;
+}
+
+.shift-off {
+    background: transparent;
+}
+
+.shift-vacation {
+    background: transparent;
+}
+
+.shift-sick {
+    background: transparent;
+}
+
+.stats-head {
+    min-width: 70px;
+    padding: 4px 5px;
+    font-size: 10px;
+}
+
+.stat-cell {
+    min-width: 70px;
+    padding: 4px 5px;
+    font-size: 12px;
+}
+
+.legend {
+    background: #fff;
+    border: 1px solid #cfd3d7;
+    margin-top: 14px;
+    padding: 13px 15px;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.legend-row {
+    display: flex;
+    gap: 8px;
+}
+
+.legend-code {
+    display: inline-block;
+    min-width: 38px;
+    font-weight: bold;
+}
+
+.footer-sign {
+    background: #fff;
+    border: 1px solid #cfd3d7;
+    border-top: 0;
+    padding: 14px 15px;
+    font-size: 12px;
+}
+
+.cell-menu {
+    position: fixed;
+    display: none;
+    background: white;
+    border: 1px solid #888;
+    box-shadow: 0 5px 18px rgba(0,0,0,.22);
+    z-index: 9999;
+    min-width: 220px;
+}
+
+.cell-menu button {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid #eee;
+    background: white;
+    text-align: left;
+    padding: 9px 12px;
+}
+
+.cell-menu button:hover {
+    background: #eee;
+}
+
+
+/* MODAL */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal {
+    width: 470px;
+    max-width: calc(100% - 30px);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 15px 50px rgba(0,0,0,.35);
+}
+
+.modal.large {
+    width: 720px;
+}
+
+.modal-header {
+    background: #252b31;
+    color: white;
+    padding: 13px 16px;
+    font-weight: bold;
+    border-radius: 6px 6px 0 0;
+}
+
+.modal-body {
+    padding: 18px;
+}
+
+.modal-footer {
+    padding: 0 18px 18px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.modal-footer button {
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    padding: 9px 15px;
+    background: #f3f3f3;
+}
+
+.modal-footer .save {
+    background: #2f6f4e;
+    border-color: #2f6f4e;
+    color: white;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    height: 38px;
+    padding: 7px 9px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    font-size: 14px;
+    background: white;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.checkbox-row input {
+    width: auto;
+    height: auto;
+}
+
+.modal-error {
+    display: none;
+    background: #fbeaea;
+    color: #9b2020;
+    padding: 8px;
+    margin-bottom: 12px;
+    font-size: 12px;
+}
+
+
+/* SHIFT MANAGER */
+
+.shift-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.shift-manager-header button {
+    background: #2f6f4e;
+    color: white;
+    border: 1px solid #2f6f4e;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+.shift-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.shift-list th,
+.shift-list td {
+    border: 1px solid #ccc;
+    padding: 7px;
+    font-size: 12px;
+    text-align: left;
+}
+
+.shift-list th {
+    background: #eee;
+}
+
+.shift-list .center {
+    text-align: center;
+}
+
+.shift-list button {
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    background: #f5f5f5;
+    padding: 5px 8px;
+    margin: 1px;
+}
+
+.shift-list .delete {
+    color: #a32626;
+}
+
+
+/* PRINT */
+
+@media print {
+
+    @page {
+        size: A4 landscape;
+        margin: 7mm;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+
+    .topbar,
+    .controls,
+    #error,
+    .cell-menu,
+    .employee-actions,
+    .modal-overlay {
+        display: none !important;
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    .header-box {
+        border: none;
+        padding: 0 0 7px;
+        margin: 0;
+    }
+
+    .title h2 {
+        font-size: 15px;
+    }
+
+    .department {
+        font-size: 11px;
+    }
+
+    .month-title {
+        font-size: 10px;
+    }
+
+    .table-wrapper {
+        border: none;
+        overflow: visible;
+    }
+
+    table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+    th,
+    td {
+        border: .4pt solid #555;
+    }
+
+    .num-head,
+    .employee-number {
+        width: 18px !important;
+        min-width: 18px !important;
+    }
+
+    .employee-head,
+    .employee-name {
+        width: 100px !important;
+        min-width: 100px !important;
+        max-width: 100px !important;
+    }
+
+    .employee-name {
+        font-size: 6.5pt;
+        padding: 2px;
+        white-space: normal;
+    }
+
+    .employee-position {
+        display: none;
+    }
+
+    .day-head,
+    .shift-cell {
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+    .shift-cell {
+        height: 18px;
+        font-size: 6pt;
+    }
+
+    .weekday {
+        font-size: 5pt;
+        padding-top: 1px;
+    }
+
+    .day-number {
+        font-size: 6pt;
+        padding: 1px;
+    }
+
+    .stats-head,
+    .stat-cell {
+        min-width: 0;
+        width: 32px;
+        font-size: 5pt;
+        padding: 1px;
+    }
+
+    .legend {
+        margin-top: 5px;
+        border: none;
+        padding: 3px 0;
+        font-size: 6.5pt;
+        line-height: 1.35;
+    }
+
+    .footer-sign {
+        border: none;
+        padding: 4px 0;
+        font-size: 7pt;
+    }
+
+    .weekend,
+    .shift-work,
+    .shift-duty,
+    .shift-off,
+    .shift-vacation,
+    .shift-sick {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+/* =====================================================
+   CENTRAL CALENDAR COLORS
+===================================================== */
+
+.calendar-off {
+    background: #e8f4e8 !important;
+}
+
+.calendar-holiday {
+    background: #cfe6cf !important;
+}
+
+
+/* =====================================================
+   FULL COLUMN CALENDAR COLORS
+===================================================== */
+
+/* Събота, неделя и неприсъствени дни */
+th.calendar-off,
+td.calendar-off,
+td.shift-cell.calendar-off {
+    background: #c9e3c9 !important;
+}
+
+/* Официални празници - още по-тъмно зелено */
+th.calendar-holiday,
+td.calendar-holiday,
+td.shift-cell.calendar-holiday {
+    background: #9fc89f !important;
+}
+
+
+/* =====================================================
+   EMPLOYEE MODAL - SAME AS FORECAST
+===================================================== */
+
+#employeeModalOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    background: rgba(0,0,0,.45);
+    align-items: center;
+    justify-content: center;
+}
+
+#employeeModalOverlay .modal {
+    width: 420px;
+    max-width: calc(100vw - 30px);
+    background: #fff;
+    border: 1px solid #c5c9cc;
+    border-radius: 5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.30);
+}
+
+#employeeModalOverlay .modal-header {
+    padding: 12px 15px;
+    border-bottom: 1px solid #d5d8da;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+#employeeModalOverlay .modal-body {
+    padding: 15px;
+}
+
+#employeeModalOverlay .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 15px;
+    border-top: 1px solid #d5d8da;
+}
+
+#employeeModalOverlay .form-group {
+    margin-bottom: 13px;
+}
+
+#employeeModalOverlay .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#employeeModalOverlay .form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid #b8bdc1;
+    border-radius: 4px;
+    font: inherit;
+}
+
+#employeeModalOverlay .modal-error {
+    min-height: 16px;
+    margin-bottom: 8px;
+    color: #a32626;
+    font-size: 12px;
+}
+
+</style>
+<script src="xlsx-js-style.min.js"></script>
+</head>
+
+<body>
+
+<div class="topbar">
+
+    <div class="topbar-left">
+        <button onclick="goBack()">← Обекти</button>
+        <h1 id="topObjectName">Отчетен график</h1>
+    </div>
+
+    <div class="topbar-right">
+        <span id="currentUser"></span>
+        <button onclick="logout()">Изход</button>
+    </div>
+
+</div>
+
+
+<div class="container" id="mainContainer">
+
+    <div id="error"></div>
+
+    <div class="header-box">
+
+        <div class="title">
+
+            <h2>ОТЧЕТЕН ГРАФИК</h2>
+
+            <div id="departmentTitle" class="department"></div>
+
+            <div id="monthTitle" class="month-title"></div>
+
+        </div>
+
+
+        <div class="controls">
+
+            <button onclick="previousMonth()">◀</button>
+
+            <select id="monthSelect"></select>
+
+            <select id="yearSelect"></select>
+
+            <button onclick="nextMonth()">▶</button>
+
+
+            <button
+                id="addEmployeeButton"
+                class="employee-btn"
+                onclick="openEmployeeModal()"
+                style="display:none">
+                + Служител
+            </button>
+
+            <button
+                id="shiftManagerButton"
+                class="shift-btn"
+                onclick="openShiftManager()"
+                style="display:none">
+                Смени
+            </button>
+
+            <button
+                onclick="generateReportedSchedule()">
+                Генерирай
+            </button>
+
+            <button
+                onclick="exportScheduleExcel()">
+                Excel
+            </button>
+
+            <button
+                class="back-btn"
+                onclick="goBack()">
+                Обекти
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- НАСТРОЙКИ НА ОТЧЕТНИТЕ СМЕНИ -->
+    <div id="legend" class="legend"></div>
+
+
+    <div id="tableWrapper" class="table-wrapper">
+
+        <div class="loading">
+            Зареждане...
+        </div>
+
+    </div>
+
+
+    <div class="footer-sign">
+        Съставил графика:
+        <strong id="scheduleAuthor"></strong>
+    </div>
+
+</div>
+
+
+<div id="cellMenu" class="cell-menu"></div>
+
+
+
+<!-- =====================================================
+     EMPLOYEE MODAL
+===================================================== -->
+
+<div id="employeeModalOverlay" class="modal-overlay">
+
+    <div class="modal">
+
+        <div id="employeeModalTitle" class="modal-header">
+            Нов служител
+        </div>
+
+        <div class="modal-body">
+
+            <div id="employeeModalError" class="modal-error"></div>
+
+            <div class="form-group">
+
+                <label>
+                    Идентификатор
+                </label>
+
+                <input
+                    id="employeeCode"
+                    type="text"
+                    maxlength="50">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Име на служителя
+                </label>
+
+                <input
+                    id="employeeName"
+                    type="text"
+                    maxlength="150">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Длъжност / отдел
+                </label>
+
+                <input
+                    id="employeePosition"
+                    type="text"
+                    maxlength="150">
+
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button onclick="closeEmployeeModal()">
+                Отказ
+            </button>
+
+            <button
+                class="save"
+                onclick="saveEmployee()">
+                Запази
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SHIFT MANAGER
+===================================================== -->
+
+<div id="shiftManagerOverlay" class="modal-overlay">
+
+    <div class="modal large">
+
+        <div class="modal-header">
+            Смени за обекта
+        </div>
+
+        <div class="modal-body">
+
+            <div class="shift-manager-header">
+
+                <strong id="shiftObjectName"></strong>
+
+                <button onclick="openShiftModal()">
+                    + Нова смяна
+                </button>
+
+            </div>
+
+            <div id="shiftManagerList"></div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button onclick="closeShiftManager()">
+                Затвори
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SHIFT EDIT MODAL
+===================================================== -->
+
+<div id="shiftModalOverlay" class="modal-overlay">
+
+    <div class="modal">
+
+        <div id="shiftModalTitle" class="modal-header">
+            Нова смяна
+        </div>
+
+        <div class="modal-body">
+
+            <div id="shiftModalError" class="modal-error"></div>
+
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>Код</label>
+
+                    <input
+                        id="shiftCode"
+                        type="text"
+                        maxlength="20"
+                        placeholder="Д">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Тип</label>
+
+                    <select id="shiftType">
+
+                        <option value="work">
+                            Работна смяна
+                        </option>
+
+                        <option value="duty">
+                            Дежурство
+                        </option>
+
+                        <option value="off">
+                            Почивка
+                        </option>
+
+                        <option value="vacation">
+                            Отпуск
+                        </option>
+
+                        <option value="sick">
+                            Болничен
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Наименование
+                </label>
+
+                <input
+                    id="shiftName"
+                    type="text"
+                    maxlength="150"
+                    placeholder="Дневна смяна">
+
+            </div>
+
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>
+                        От час
+                    </label>
+
+                    <input
+                        id="shiftFrom"
+                        type="time">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        До час
+                    </label>
+
+                    <input
+                        id="shiftTo"
+                        type="time">
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="checkbox-row">
+
+                    <input
+                        id="shiftWorkDay"
+                        type="checkbox">
+
+                    Брои се за работен ден
+
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+            <button onclick="closeShiftModal()">
+                Отказ
+            </button>
+
+            <button
+                class="save"
+                onclick="saveShift()">
+                Запази
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+let currentUser = null;
+let currentObject = null;
+
+let employees = [];
+let shifts = [];
+let scheduleEntries = [];
+
+let selectedEmployeeId = null;
+let selectedDate = null;
+
+let editingEmployeeId = null;
+let editingShiftId = null;
+
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const objectId =
+    Number(
+        params.get('object')
+    );
+
+
+
+let workCalendar = null;
+let workCalendarDays = [];
+
+
+/* =====================================================
+   CENTRAL WORK CALENDAR
+===================================================== */
+
+async function loadWorkCalendar(
+    year,
+    month
+) {
+
+    workCalendar = null;
+    workCalendarDays = [];
+
+
+    try {
+
+        const calendarResponse =
+            await fetch(
+                '/staff-compat-api.php/api/calendar/' +
+                year +
+                '/' +
+                month,
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (!calendarResponse.ok) {
+
+            throw new Error(
+                'Няма данни за работния календар.'
+            );
+        }
+
+
+        const calendarData =
+            await calendarResponse.json();
+
+
+        workCalendar =
+            calendarData;
+
+
+        const daysResponse =
+            await fetch(
+                '/staff-compat-api.php/api/calendar/' +
+                year +
+                '/' +
+                month +
+                '/days',
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (!daysResponse.ok) {
+
+            throw new Error(
+                'Не могат да се заредят дните от календара.'
+            );
+        }
+
+
+        const daysData =
+            await daysResponse.json();
+
+
+        workCalendarDays =
+            Array.isArray(daysData)
+                ? daysData
+                : [];
+
+
+        /*
+           Ако sync-ът към КиК е неуспешен,
+           продължаваме с последния локален календар.
+        */
+
+        if (
+            calendarData.fallback
+        ) {
+
+            showError(
+                'Календарът не е обновен от КиК. ' +
+                'Използват се последните локално записани данни.'
+            );
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            'Calendar:',
+            error
+        );
+
+
+        showError(
+            'Работният календар не може да бъде зареден. ' +
+            'Използва се резервно събота/неделя.'
+        );
+    }
+}
+
+
+
+function getCalendarDay(
+    year,
+    month,
+    day
+) {
+
+    const dateString =
+        formatDate(
+            year,
+            month,
+            day
+        );
+
+
+    return workCalendarDays.find(
+        item =>
+            item.work_date ===
+            dateString
+    ) || null;
+}
+
+
+
+function isCalendarNonWorkday(
+    year,
+    month,
+    day
+) {
+
+    const calendarDay =
+        getCalendarDay(
+            year,
+            month,
+            day
+        );
+
+
+    /*
+       Основен режим:
+       централният календар.
+    */
+
+    if (calendarDay) {
+
+        return (
+            Number(
+                calendarDay.is_workday
+            ) !== 1
+        );
+    }
+
+
+    /*
+       Fallback:
+       ако няма календарни данни.
+    */
+
+    const date =
+        new Date(
+            year,
+            month - 1,
+            day
+        );
+
+
+    return (
+        date.getDay() === 0 ||
+        date.getDay() === 6
+    );
+}
+
+
+
+
+function calendarDayClass(
+    year,
+    month,
+    day
+) {
+
+    const calendarDay =
+        getCalendarDay(
+            year,
+            month,
+            day
+        );
+
+
+    if (calendarDay) {
+
+        if (
+            Number(
+                calendarDay.is_holiday
+            ) === 1
+        ) {
+
+            return 'calendar-holiday';
+        }
+
+
+        if (
+            Number(
+                calendarDay.is_workday
+            ) !== 1
+        ) {
+
+            return 'calendar-off';
+        }
+    }
+
+
+    return '';
+}
+
+
+function calendarDayTitle(
+    year,
+    month,
+    day
+) {
+
+    const calendarDay =
+        getCalendarDay(
+            year,
+            month,
+            day
+        );
+
+
+    if (
+        calendarDay &&
+        calendarDay.holiday_name
+    ) {
+
+        return calendarDay.holiday_name;
+    }
+
+
+    return '';
+}
+
+
+const monthNames = [
+    'Януари',
+    'Февруари',
+    'Март',
+    'Април',
+    'Май',
+    'Юни',
+    'Юли',
+    'Август',
+    'Септември',
+    'Октомври',
+    'Ноември',
+    'Декември'
+];
+
+
+const weekdayNames = [
+    'Нд',
+    'Пн',
+    'Вт',
+    'Ср',
+    'Чт',
+    'Пт',
+    'Сб'
+];
+
+
+init();
+
+
+
+/* =====================================================
+   START
+===================================================== */
+
+async function init() {
+
+    if (!objectId) {
+
+        window.location.href =
+            'obekti.html';
+
+        return;
+    }
+
+    const logged =
+        await loadCurrentUser();
+
+    if (!logged) {
+        return;
+    }
+
+    createMonthYearSelectors();
+
+    const objectOk =
+        await loadObject();
+
+    if (!objectOk) {
+        return;
+    }
+
+    await loadEmployees();
+
+    await loadShifts();
+
+    await loadSchedule();
+}
+
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+async function loadCurrentUser() {
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/auth/me',
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+        if (
+            response.status === 401
+        ) {
+
+            window.location.href =
+                '/login.php';
+
+            return false;
+        }
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при проверка на потребителя'
+            );
+        }
+
+
+        currentUser =
+            data.user;
+
+
+        document
+            .getElementById(
+                'currentUser'
+            )
+            .textContent =
+                currentUser.full_name +
+                ' (' +
+                currentUser.username +
+                ')';
+
+        document
+            .getElementById(
+                'scheduleAuthor'
+            )
+            .textContent =
+                currentUser.full_name;
+
+
+        document
+            .getElementById(
+                'mainContainer'
+            )
+            .classList.add(
+                'editor'
+            );
+
+
+
+
+
+        document
+            .getElementById(
+                'addEmployeeButton'
+            )
+            .style.display =
+                'inline-block';
+
+
+        document
+            .getElementById(
+                'shiftManagerButton'
+            )
+            .style.display =
+                'inline-block';
+
+
+        if (
+            currentUser.role ===
+            'admin'
+        ) {
+
+            document
+                .getElementById(
+                    'mainContainer'
+                )
+                .classList.add(
+                    'admin'
+                );
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+
+        return false;
+    }
+}
+
+
+
+/* =====================================================
+   OBJECT
+===================================================== */
+
+async function loadObject() {
+
+    const data =
+        await apiFetch(
+            '/staff-compat-api.php/api/objects/' +
+            objectId
+        );
+
+
+    if (!data) {
+        return false;
+    }
+
+
+    currentObject =
+        data;
+
+
+    document
+        .getElementById(
+            'topObjectName'
+        )
+        .textContent =
+            currentObject.name;
+
+
+    document
+        .getElementById(
+            'departmentTitle'
+        )
+        .textContent =
+            currentObject.name +
+            (
+                currentObject.description
+                ? ' - ' +
+                    currentObject.description
+                : ''
+            );
+
+
+    return true;
+}
+
+
+
+/* =====================================================
+   EMPLOYEES
+===================================================== */
+
+async function loadEmployees() {
+
+    const data =
+        await apiFetch(
+            '/staff-compat-api.php/api/objects/' +
+            objectId +
+            '/employees'
+        );
+
+
+    employees =
+        Array.isArray(data)
+            ? data.filter(
+                employee =>
+                    Number(
+                        employee.active
+                    ) === 1
+            )
+            : [];
+}
+
+
+
+function openEmployeeModal(
+    employeeId = null
+) {
+
+    if (
+        !currentUser
+    ) {
+        return;
+    }
+
+
+    editingEmployeeId =
+        employeeId;
+
+
+    document
+        .getElementById(
+            'employeeModalError'
+        )
+        .style.display =
+            'none';
+
+
+    if (employeeId) {
+
+        const employee =
+            employees.find(
+                item =>
+                    Number(item.id) ===
+                    Number(employeeId)
+            );
+
+
+        if (!employee) {
+            return;
+        }
+
+
+        document
+            .getElementById(
+                'employeeModalTitle'
+            )
+            .textContent =
+                'Редакция на служител';
+
+
+        document
+            .getElementById(
+                'employeeCode'
+            )
+            .value =
+                employee.employee_code || '';
+
+
+        document
+            .getElementById(
+                'employeeName'
+            )
+            .value =
+                employee.name || '';
+
+
+        document
+            .getElementById(
+                'employeePosition'
+            )
+            .value =
+                employee.position_name ||
+                '';
+
+    } else {
+
+        document
+            .getElementById(
+                'employeeModalTitle'
+            )
+            .textContent =
+                'Нов служител';
+
+
+        document
+            .getElementById(
+                'employeeCode'
+            )
+            .value =
+                '';
+
+
+        document
+            .getElementById(
+                'employeeName'
+            )
+            .value =
+                '';
+
+
+        document
+            .getElementById(
+                'employeePosition'
+            )
+            .value =
+                '';
+    }
+
+
+    document
+        .getElementById(
+            'employeeModalOverlay'
+        )
+        .style.display =
+            'flex';
+}
+
+
+
+function closeEmployeeModal() {
+
+    editingEmployeeId =
+        null;
+
+    document
+        .getElementById(
+            'employeeModalOverlay'
+        )
+        .style.display =
+            'none';
+}
+
+
+
+async function saveEmployee() {
+
+    const employeeCode =
+        document
+            .getElementById(
+                'employeeCode'
+            )
+            .value
+            .trim();
+
+
+    const name =
+        document
+            .getElementById(
+                'employeeName'
+            )
+            .value
+            .trim();
+
+
+    const position =
+        document
+            .getElementById(
+                'employeePosition'
+            )
+            .value
+            .trim();
+
+
+    if (!name) {
+
+        showEmployeeModalError(
+            'Въведи име на служителя.'
+        );
+
+        return;
+    }
+
+
+    const body = {
+
+        object_id:
+            objectId,
+
+        employee_code:
+            employeeCode || null,
+
+        name:
+            name,
+
+        position_name:
+            position,
+
+        active:
+            1
+    };
+
+
+    try {
+
+        let response;
+
+
+        if (
+            !editingEmployeeId
+        ) {
+
+            response =
+                await fetch(
+                    '/staff-compat-api.php/api/objects/' +
+                    objectId +
+                    '/employees',
+                    {
+                        method:
+                            'POST',
+
+                        credentials:
+                            'same-origin',
+
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+
+                        body:
+                            JSON.stringify(
+                                body
+                            )
+                    }
+                );
+
+        } else {
+
+            response =
+                await fetch(
+                    '/staff-compat-api.php/api/employees/' +
+                    editingEmployeeId,
+                    {
+                        method:
+                            'PUT',
+
+                        credentials:
+                            'same-origin',
+
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+
+                        body:
+                            JSON.stringify(
+                                body
+                            )
+                    }
+                );
+
+
+            if (
+                response.status ===
+                404
+            ) {
+
+                response =
+                    await fetch(
+                        '/staff-compat-api.php/api/objects/' +
+                        objectId +
+                        '/employees/' +
+                        editingEmployeeId,
+                        {
+                            method:
+                                'PUT',
+
+                            credentials:
+                                'same-origin',
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json'
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    body
+                                )
+                        }
+                    );
+            }
+        }
+
+
+        const data =
+            await response
+                .json()
+                .catch(
+                    () => ({})
+                );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при запис'
+            );
+        }
+
+
+        closeEmployeeModal();
+
+        await loadEmployees();
+
+        if (data.warning) {
+
+            alert(
+                data.warning
+            );
+        }
+
+
+        await loadSchedule();
+
+
+    } catch (error) {
+
+        showEmployeeModalError(
+            error.message
+        );
+    }
+}
+
+
+
+async function deleteEmployee(
+    employeeId
+) {
+
+    const employee =
+        employees.find(
+            item =>
+                Number(item.id) ===
+                Number(employeeId)
+        );
+
+
+    if (!employee) {
+        return;
+    }
+
+
+    if (
+        !confirm(
+            'Да изтрия ли служителя:\n\n' +
+            employee.name +
+            '?'
+        )
+    ) {
+        return;
+    }
+
+
+    try {
+
+        let response =
+            await fetch(
+                '/staff-compat-api.php/api/employees/' +
+                employeeId,
+                {
+                    method:
+                        'DELETE',
+
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (
+            response.status ===
+            404
+        ) {
+
+            response =
+                await fetch(
+                    '/staff-compat-api.php/api/objects/' +
+                    objectId +
+                    '/employees/' +
+                    employeeId,
+                    {
+                        method:
+                            'DELETE',
+
+                        credentials:
+                            'same-origin'
+                    }
+                );
+        }
+
+
+        const data =
+            await response
+                .json()
+                .catch(
+                    () => ({})
+                );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при изтриване'
+            );
+        }
+
+
+        await loadEmployees();
+
+        await loadSchedule();
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+    }
+}
+
+
+
+/* =====================================================
+   SHIFTS LOAD
+===================================================== */
+
+async function loadShifts() {
+
+    const data =
+        await apiFetch(
+            '/staff-compat-api.php/api/objects/' +
+            objectId +
+            '/shifts'
+        );
+
+
+    shifts =
+        Array.isArray(data)
+            ? data.filter(
+                shift =>
+                    Number(
+                        shift.active
+                    ) === 1
+            )
+            : [];
+
+
+    renderLegend();
+
+    renderShiftManager();
+}
+
+
+
+/* =====================================================
+   DYNAMIC LEGEND
+===================================================== */
+
+
+let reportedShiftSettings = [];
+
+
+function addReportedHours(
+    start,
+    hours
+) {
+
+    if (!start) {
+        return '';
+    }
+
+    const parts =
+        String(start)
+            .substring(0,5)
+            .split(':');
+
+    let value =
+        Number(parts[0]) * 60 +
+        Number(parts[1]);
+
+    value =
+        (
+            value +
+            Number(hours) * 60
+        ) % 1440;
+
+    return (
+        String(
+            Math.floor(value / 60)
+        ).padStart(2,'0') +
+        ':' +
+        String(
+            value % 60
+        ).padStart(2,'0')
+    );
+}
+
+
+function reportedSetting(
+    baseCode,
+    duration
+) {
+
+    return reportedShiftSettings.find(
+        item =>
+            item.base_code === baseCode &&
+            Number(item.duration_hours) ===
+                Number(duration)
+    ) || null;
+}
+
+
+function reportedDefaultStart(
+    baseCode,
+    duration
+) {
+
+    const defaults = {
+
+        D1: {
+            8:'07:00',
+            6:'07:00',
+            4:'07:00'
+        },
+
+        D2: {
+            8:'10:00',
+            6:'10:00',
+            4:'10:00'
+        },
+
+        N: {
+            8:'00:00',
+            6:'00:00',
+            4:'04:00'
+        }
+    };
+
+    return defaults[baseCode][duration];
+}
+
+
+async function loadReportedShiftSettings() {
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/reported/' +
+                objectId +
+                '/shift-settings',
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+        const data =
+            await response
+                .json()
+                .catch(() => ({}));
+
+
+        if (!response.ok) {
+            throw new Error(
+                data.error ||
+                'Грешка при зареждане настройките на смените'
+            );
+        }
+
+
+        reportedShiftSettings =
+            Array.isArray(data.settings)
+                ? data.settings
+                : [];
+
+
+    } catch (error) {
+
+        reportedShiftSettings = [];
+
+        console.error(error);
+    }
+}
+
+
+function reportedShortCard(
+    baseCode,
+    code,
+    name,
+    duration
+) {
+
+    const setting =
+        reportedSetting(
+            baseCode,
+            duration
+        );
+
+    const start =
+        setting
+            ? String(
+                setting.start_time
+              ).substring(0,5)
+            : reportedDefaultStart(
+                baseCode,
+                duration
+              );
+
+    const end =
+        addReportedHours(
+            start,
+            duration
+        );
+
+
+    return (
+        '<div class="reported-shift-card">' +
+
+            '<div class="reported-shift-code">' +
+                escapeHtml(code) +
+            '</div>' +
+
+            '<div class="reported-shift-card-body">' +
+
+                '<div class="reported-shift-name">' +
+                    escapeHtml(name) +
+                '</div>' +
+
+                '<div class="reported-time-row">' +
+                    '<span>Начало:</span>' +
+
+                    '<input ' +
+                        'type="time" ' +
+                        'class="reported-start-input" ' +
+                        'data-base="' +
+                            baseCode +
+                        '" ' +
+                        'data-duration="' +
+                            duration +
+                        '" ' +
+                        'value="' +
+                            start +
+                        '" ' +
+                        'oninput="reportedTimeChanged(this)">' +
+                '</div>' +
+
+                '<div class="reported-time-row">' +
+                    '<span>Край:</span>' +
+
+                    '<span class="reported-time-end">' +
+                        end +
+                    '</span>' +
+                '</div>' +
+
+                '<div class="reported-shift-hours">' +
+                    '(' +
+                    duration +
+                    ' ч.)' +
+                '</div>' +
+
+            '</div>' +
+
+        '</div>'
+    );
+}
+
+
+function reportedFixedCard(
+    code,
+    name,
+    timeText,
+    hoursText = ''
+) {
+
+    return (
+        '<div class="reported-shift-card">' +
+
+            '<div class="reported-shift-code">' +
+                escapeHtml(code) +
+            '</div>' +
+
+            '<div class="reported-shift-card-body">' +
+
+                '<div class="reported-shift-name">' +
+                    escapeHtml(name) +
+                '</div>' +
+
+                (
+                    timeText
+                        ? '<div class="reported-shift-line">' +
+                          escapeHtml(timeText) +
+                          '</div>'
+                        : ''
+                ) +
+
+                (
+                    hoursText
+                        ? '<div class="reported-shift-hours">' +
+                          escapeHtml(hoursText) +
+                          '</div>'
+                        : ''
+                ) +
+
+            '</div>' +
+
+        '</div>'
+    );
+}
+
+
+
+async function renderLegend() {
+
+    const container =
+        document.getElementById(
+            'legend'
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    await loadReportedShiftSettings();
+
+
+    container.className =
+        'legend reported-shift-panel';
+
+
+    let html =
+
+        '<div class="reported-shift-panel-head">' +
+
+            '<h3>Смени</h3>' +
+
+            '<div class="reported-shift-info">' +
+                'Часовете са в 24-часов формат. ' +
+                'При 6/8 часовите смени се променя само началният час. ' +
+                'Продължителността е фиксирана.' +
+            '</div>' +
+
+        '</div>' +
+
+
+        '<div class="reported-fixed-row">' +
+
+            reportedFixedCard(
+                'Д1',
+                'Дневна смяна',
+                '07:00 - 19:00',
+                '(12 ч.)'
+            ) +
+
+            reportedFixedCard(
+                'Д2',
+                'Втора дневна',
+                '10:00 - 22:00',
+                '(12 ч.)'
+            ) +
+
+            reportedFixedCard(
+                'П',
+                'Почивка',
+                '',
+                ''
+            ) +
+
+            reportedFixedCard(
+                'О',
+                'Отпуск',
+                '08:00 - 17:00',
+                '(8 ч.)'
+            ) +
+
+            reportedFixedCard(
+                'Б',
+                'Болничен',
+                '',
+                ''
+            ) +
+
+            reportedFixedCard(
+                'ME',
+                'Междинна',
+                '05:00 - 14:00',
+                '(9 ч.)'
+            ) +
+
+            reportedFixedCard(
+                'Н',
+                'Нощна смяна',
+                '20:00 - 08:00',
+                '(12 ч.)'
+            ) +
+
+        '</div>' +
+
+
+        '<div class="reported-editable-row">' +
+
+            reportedShortCard(
+                'D1',
+                'Д1-8',
+                'Дневна 8 часа',
+                8
+            ) +
+
+            reportedShortCard(
+                'D1',
+                'Д1-6',
+                'Дневна 6 часа',
+                6
+            ) +
+
+            reportedShortCard(
+                'D2',
+                'Д2-8',
+                'Втора 8 часа',
+                8
+            ) +
+
+            reportedShortCard(
+                'D2',
+                'Д2-6',
+                'Втора 6 часа',
+                6
+            ) +
+
+
+        '</div>' +
+
+
+        '<div class="reported-shift-actions">' +
+
+            '<button ' +
+                'class="reported-shift-save" ' +
+                'onclick="saveReportedShiftSettings()">' +
+                '💾 Запази' +
+            '</button>' +
+
+            '<button ' +
+                'class="reported-shift-reset" ' +
+                'onclick="resetReportedShiftSettings()">' +
+                '↻ По подразбиране' +
+            '</button>' +
+
+        '</div>' +
+
+        '<div ' +
+            'id="reportedShiftSettingsMessage" ' +
+            'class="reported-shift-message">' +
+        '</div>';
+
+
+    container.innerHTML =
+        html;
+}
+
+
+function reportedTimeChanged(
+    input
+) {
+
+    const duration =
+        Number(
+            input.dataset.duration
+        );
+
+    const end =
+        addReportedHours(
+            input.value,
+            duration
+        );
+
+    const row =
+        input.closest(
+            '.reported-shift-card-body'
+        );
+
+    const endBox =
+        row.querySelector(
+            '.reported-time-end'
+        );
+
+    if (endBox) {
+        endBox.textContent =
+            end;
+    }
+}
+
+
+async function saveReportedShiftSettings() {
+
+    const inputs =
+        Array.from(
+            document.querySelectorAll(
+                '.reported-start-input'
+            )
+        );
+
+
+    const settings =
+        inputs.map(
+            input => ({
+                base_code:
+                    input.dataset.base,
+
+                duration_hours:
+                    Number(
+                        input.dataset.duration
+                    ),
+
+                start_time:
+                    input.value
+            })
+        );
+
+
+    const message =
+        document.getElementById(
+            'reportedShiftSettingsMessage'
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/reported/' +
+                objectId +
+                '/shift-settings',
+                {
+                    method:
+                        'PUT',
+
+                    credentials:
+                        'same-origin',
+
+                    headers: {
+                        'Content-Type':
+                            'application/json'
+                    },
+
+                    body:
+                        JSON.stringify({
+                            settings
+                        })
+                }
+            );
+
+
+        const data =
+            await response
+                .json()
+                .catch(() => ({}));
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при запис'
+            );
+        }
+
+
+        message.textContent =
+            'Настройките са записани.';
+
+        await loadReportedShiftSettings();
+
+
+    } catch (error) {
+
+        message.textContent =
+            error.message;
+    }
+}
+
+
+function resetReportedShiftSettings() {
+
+    const defaults = {
+
+        'D1-8':'07:00',
+        'D1-6':'07:00',
+
+        'D2-8':'10:00',
+        'D2-6':'10:00'
+    };
+
+
+    document
+        .querySelectorAll(
+            '.reported-start-input'
+        )
+        .forEach(
+            input => {
+
+                const key =
+                    input.dataset.base +
+                    '-' +
+                    input.dataset.duration;
+
+                input.value =
+                    defaults[key];
+
+                reportedTimeChanged(
+                    input
+                );
+            }
+        );
+
+
+    const message =
+        document.getElementById(
+            'reportedShiftSettingsMessage'
+        );
+
+    if (message) {
+        message.textContent =
+            'Върнати са стойностите по подразбиране. Натисни „Запази“.';
+    }
+}
+
+
+
+
+function buildShiftDescription(
+    shift
+) {
+
+    let text =
+        shift.name || '';
+
+
+    if (
+        shift.time_from &&
+        shift.time_to
+    ) {
+
+        text +=
+            ' от ' +
+            shortTime(
+                shift.time_from
+            ) +
+            'ч. до ' +
+            shortTime(
+                shift.time_to
+            ) +
+            'ч.';
+    }
+
+
+    return text;
+}
+
+
+
+function shortTime(value) {
+
+    if (!value) {
+        return '';
+    }
+
+
+    return String(value)
+        .substring(
+            0,
+            5
+        );
+}
+
+
+
+/* =====================================================
+   SHIFT MANAGER
+===================================================== */
+
+function openShiftManager() {
+
+    if (
+        !currentUser
+    ) {
+        return;
+    }
+
+
+    document
+        .getElementById(
+            'shiftObjectName'
+        )
+        .textContent =
+            currentObject
+                ? currentObject.name
+                : '';
+
+
+    renderShiftManager();
+
+
+    document
+        .getElementById(
+            'shiftManagerOverlay'
+        )
+        .style.display =
+            'flex';
+}
+
+
+
+function closeShiftManager() {
+
+    document
+        .getElementById(
+            'shiftManagerOverlay'
+        )
+        .style.display =
+            'none';
+}
+
+
+
+function renderShiftManager() {
+
+    const container =
+        document.getElementById(
+            'shiftManagerList'
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (
+        shifts.length === 0
+    ) {
+
+        container.innerHTML =
+            '<div style="padding:20px;text-align:center;color:#666;">' +
+            'Няма въведени смени.' +
+            '</div>';
+
+        return;
+    }
+
+
+    let html = '';
+
+    html +=
+        '<table class="shift-list">';
+
+
+    html +=
+        '<thead>' +
+        '<tr>' +
+
+        '<th>Код</th>' +
+        '<th>Наименование</th>' +
+        '<th>Тип</th>' +
+        '<th>От</th>' +
+        '<th>До</th>' +
+        '<th>Раб. ден</th>' +
+        '<th>Действия</th>' +
+
+        '</tr>' +
+        '</thead>';
+
+
+    html +=
+        '<tbody>';
+
+
+    shifts.forEach(
+        shift => {
+
+            html +=
+                '<tr>';
+
+
+            html +=
+                '<td><strong>' +
+                escapeHtml(
+                    shift.code
+                ) +
+                '</strong></td>';
+
+
+            html +=
+                '<td>' +
+                escapeHtml(
+                    shift.name
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td>' +
+                escapeHtml(
+                    shiftTypeName(
+                        shift.type
+                    )
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td>' +
+                escapeHtml(
+                    shortTime(
+                        shift.time_from
+                    )
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td>' +
+                escapeHtml(
+                    shortTime(
+                        shift.time_to
+                    )
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td class="center">' +
+                (
+                    Number(
+                        shift.counts_as_work_day
+                    ) === 1
+                        ? 'Да'
+                        : 'Не'
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td class="center">' +
+
+                '<button onclick="openShiftModal(' +
+                Number(
+                    shift.id
+                ) +
+                ')">Редакция</button>' +
+
+                '<button class="delete" onclick="deleteShift(' +
+                Number(
+                    shift.id
+                ) +
+                ')">Изтрий</button>' +
+
+                '</td>';
+
+
+            html +=
+                '</tr>';
+        }
+    );
+
+
+    html +=
+        '</tbody></table>';
+
+
+    container.innerHTML =
+        html;
+}
+
+
+
+function shiftTypeName(
+    type
+) {
+
+    switch (type) {
+
+        case 'work':
+            return 'Работа';
+
+        case 'duty':
+            return 'Дежурство';
+
+        case 'off':
+            return 'Почивка';
+
+        case 'vacation':
+            return 'Отпуск';
+
+        case 'sick':
+            return 'Болничен';
+
+        default:
+            return type || '';
+    }
+}
+
+
+
+/* =====================================================
+   SHIFT EDIT
+===================================================== */
+
+function openShiftModal(
+    shiftId = null
+) {
+
+    editingShiftId =
+        shiftId;
+
+
+    document
+        .getElementById(
+            'shiftModalError'
+        )
+        .style.display =
+            'none';
+
+
+    if (shiftId) {
+
+        const shift =
+            shifts.find(
+                item =>
+                    Number(item.id) ===
+                    Number(shiftId)
+            );
+
+
+        if (!shift) {
+            return;
+        }
+
+
+        document
+            .getElementById(
+                'shiftModalTitle'
+            )
+            .textContent =
+                'Редакция на смяна';
+
+
+        document
+            .getElementById(
+                'shiftCode'
+            )
+            .value =
+                shift.code || '';
+
+
+        document
+            .getElementById(
+                'shiftName'
+            )
+            .value =
+                shift.name || '';
+
+
+        document
+            .getElementById(
+                'shiftType'
+            )
+            .value =
+                shift.type || 'work';
+
+
+        document
+            .getElementById(
+                'shiftFrom'
+            )
+            .value =
+                shortTime(
+                    shift.time_from
+                );
+
+
+        document
+            .getElementById(
+                'shiftTo'
+            )
+            .value =
+                shortTime(
+                    shift.time_to
+                );
+
+
+        document
+            .getElementById(
+                'shiftWorkDay'
+            )
+            .checked =
+                Number(
+                    shift.counts_as_work_day
+                ) === 1;
+
+    } else {
+
+        document
+            .getElementById(
+                'shiftModalTitle'
+            )
+            .textContent =
+                'Нова смяна';
+
+
+        document
+            .getElementById(
+                'shiftCode'
+            )
+            .value =
+                '';
+
+
+        document
+            .getElementById(
+                'shiftName'
+            )
+            .value =
+                '';
+
+
+        document
+            .getElementById(
+                'shiftType'
+            )
+            .value =
+                'work';
+
+
+        document
+            .getElementById(
+                'shiftFrom'
+            )
+            .value =
+                '';
+
+
+        document
+            .getElementById(
+                'shiftTo'
+            )
+            .value =
+                '';
+
+
+        document
+            .getElementById(
+                'shiftWorkDay'
+            )
+            .checked =
+                false;
+    }
+
+
+    document
+        .getElementById(
+            'shiftModalOverlay'
+        )
+        .style.display =
+            'flex';
+}
+
+
+
+function closeShiftModal() {
+
+    editingShiftId =
+        null;
+
+
+    document
+        .getElementById(
+            'shiftModalOverlay'
+        )
+        .style.display =
+            'none';
+}
+
+
+
+async function saveShift() {
+
+    const code =
+        document
+            .getElementById(
+                'shiftCode'
+            )
+            .value
+            .trim();
+
+
+    const name =
+        document
+            .getElementById(
+                'shiftName'
+            )
+            .value
+            .trim();
+
+
+    const type =
+        document
+            .getElementById(
+                'shiftType'
+            )
+            .value;
+
+
+    const timeFrom =
+        document
+            .getElementById(
+                'shiftFrom'
+            )
+            .value;
+
+
+    const timeTo =
+        document
+            .getElementById(
+                'shiftTo'
+            )
+            .value;
+
+
+    const workDay =
+        document
+            .getElementById(
+                'shiftWorkDay'
+            )
+            .checked
+                ? 1
+                : 0;
+
+
+    if (!code) {
+
+        showShiftModalError(
+            'Въведи код на смяната.'
+        );
+
+        return;
+    }
+
+
+    if (!name) {
+
+        showShiftModalError(
+            'Въведи наименование.'
+        );
+
+        return;
+    }
+
+
+    const body = {
+
+        object_id:
+            objectId,
+
+        code:
+            code,
+
+        name:
+            name,
+
+        type:
+            type,
+
+        time_from:
+            timeFrom || null,
+
+        time_to:
+            timeTo || null,
+
+        counts_as_work_day:
+            workDay,
+
+        active:
+            1
+    };
+
+
+    try {
+
+        let response;
+
+
+        if (
+            !editingShiftId
+        ) {
+
+            response =
+                await fetch(
+                    '/staff-compat-api.php/api/objects/' +
+                    objectId +
+                    '/shifts',
+                    {
+                        method:
+                            'POST',
+
+                        credentials:
+                            'same-origin',
+
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+
+                        body:
+                            JSON.stringify(
+                                body
+                            )
+                    }
+                );
+
+        } else {
+
+            response =
+                await fetch(
+                    '/staff-compat-api.php/api/shifts/' +
+                    editingShiftId,
+                    {
+                        method:
+                            'PUT',
+
+                        credentials:
+                            'same-origin',
+
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+
+                        body:
+                            JSON.stringify(
+                                body
+                            )
+                    }
+                );
+
+
+            if (
+                response.status ===
+                404
+            ) {
+
+                response =
+                    await fetch(
+                        '/staff-compat-api.php/api/objects/' +
+                        objectId +
+                        '/shifts/' +
+                        editingShiftId,
+                        {
+                            method:
+                                'PUT',
+
+                            credentials:
+                                'same-origin',
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json'
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    body
+                                )
+                        }
+                    );
+            }
+        }
+
+
+        const data =
+            await response
+                .json()
+                .catch(
+                    () => ({})
+                );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при запис на смяната'
+            );
+        }
+
+
+        closeShiftModal();
+
+
+        await loadShifts();
+
+
+        renderShiftManager();
+
+
+        await loadSchedule();
+
+
+    } catch (error) {
+
+        showShiftModalError(
+            error.message
+        );
+    }
+}
+
+
+
+/* =====================================================
+   DELETE SHIFT
+===================================================== */
+
+async function deleteShift(
+    shiftId
+) {
+
+    const shift =
+        shifts.find(
+            item =>
+                Number(item.id) ===
+                Number(shiftId)
+        );
+
+
+    if (!shift) {
+        return;
+    }
+
+
+    if (
+        !confirm(
+            'Да изтрия ли смяна "' +
+            shift.code +
+            ' - ' +
+            shift.name +
+            '"?'
+        )
+    ) {
+        return;
+    }
+
+
+    try {
+
+        let response =
+            await fetch(
+                '/staff-compat-api.php/api/shifts/' +
+                shiftId,
+                {
+                    method:
+                        'DELETE',
+
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (
+            response.status ===
+            404
+        ) {
+
+            response =
+                await fetch(
+                    '/staff-compat-api.php/api/objects/' +
+                    objectId +
+                    '/shifts/' +
+                    shiftId,
+                    {
+                        method:
+                            'DELETE',
+
+                        credentials:
+                            'same-origin'
+                    }
+                );
+        }
+
+
+        const data =
+            await response
+                .json()
+                .catch(
+                    () => ({})
+                );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Смяната не може да бъде изтрита.'
+            );
+        }
+
+
+        await loadShifts();
+
+        await loadSchedule();
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+    }
+}
+
+
+
+function showShiftModalError(
+    message
+) {
+
+    const box =
+        document.getElementById(
+            'shiftModalError'
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.style.display =
+        'block';
+}
+
+
+
+/* =====================================================
+   MONTH
+===================================================== */
+
+function createMonthYearSelectors() {
+
+    const monthSelect =
+        document.getElementById(
+            'monthSelect'
+        );
+
+
+    monthNames.forEach(
+        (name, index) => {
+
+            const option =
+                document.createElement(
+                    'option'
+                );
+
+
+            option.value =
+                index + 1;
+
+
+            option.textContent =
+                name;
+
+
+            monthSelect
+                .appendChild(
+                    option
+                );
+        }
+    );
+
+
+    const yearSelect =
+        document.getElementById(
+            'yearSelect'
+        );
+
+
+    const now =
+        new Date();
+
+
+    for (
+        let year =
+            now.getFullYear() - 5;
+
+        year <=
+            now.getFullYear() + 5;
+
+        year++
+    ) {
+
+        const option =
+            document.createElement(
+                'option'
+            );
+
+
+        option.value =
+            year;
+
+
+        option.textContent =
+            year;
+
+
+        yearSelect
+            .appendChild(
+                option
+            );
+    }
+
+
+    monthSelect.value =
+        now.getMonth() + 1;
+
+
+    yearSelect.value =
+        now.getFullYear();
+}
+
+
+
+function previousMonth() {
+
+    let month =
+        Number(
+            document
+                .getElementById(
+                    'monthSelect'
+                )
+                .value
+        );
+
+
+    let year =
+        Number(
+            document
+                .getElementById(
+                    'yearSelect'
+                )
+                .value
+        );
+
+
+    month--;
+
+
+    if (
+        month < 1
+    ) {
+
+        month = 12;
+
+        year--;
+    }
+
+
+    ensureYearOption(
+        year
+    );
+
+
+    document
+        .getElementById(
+            'monthSelect'
+        )
+        .value =
+            month;
+
+
+    document
+        .getElementById(
+            'yearSelect'
+        )
+        .value =
+            year;
+
+
+    loadSchedule();
+}
+
+
+
+function nextMonth() {
+
+    let month =
+        Number(
+            document
+                .getElementById(
+                    'monthSelect'
+                )
+                .value
+        );
+
+
+    let year =
+        Number(
+            document
+                .getElementById(
+                    'yearSelect'
+                )
+                .value
+        );
+
+
+    month++;
+
+
+    if (
+        month > 12
+    ) {
+
+        month = 1;
+
+        year++;
+    }
+
+
+    ensureYearOption(
+        year
+    );
+
+
+    document
+        .getElementById(
+            'monthSelect'
+        )
+        .value =
+            month;
+
+
+    document
+        .getElementById(
+            'yearSelect'
+        )
+        .value =
+            year;
+
+
+    loadSchedule();
+}
+
+
+
+function ensureYearOption(
+    year
+) {
+
+    const select =
+        document.getElementById(
+            'yearSelect'
+        );
+
+
+    const exists =
+        Array.from(
+            select.options
+        )
+        .some(
+            option =>
+                Number(
+                    option.value
+                ) ===
+                Number(year)
+        );
+
+
+    if (!exists) {
+
+        const option =
+            document.createElement(
+                'option'
+            );
+
+
+        option.value =
+            year;
+
+
+        option.textContent =
+            year;
+
+
+        select.appendChild(
+            option
+        );
+    }
+}
+
+
+
+
+/* =====================================================
+   GENERATE REPORTED SCHEDULE
+===================================================== */
+
+async function generateReportedSchedule() {
+
+    const year =
+        Number(
+            document
+                .getElementById(
+                    'yearSelect'
+                )
+                .value
+        );
+
+
+    const month =
+        Number(
+            document
+                .getElementById(
+                    'monthSelect'
+                )
+                .value
+        );
+
+
+    let resultBox =
+        document.getElementById(
+            'reportedGenerateResult'
+        );
+
+
+    if (!resultBox) {
+
+        resultBox =
+            document.createElement(
+                'div'
+            );
+
+        resultBox.id =
+            'reportedGenerateResult';
+
+        resultBox.style.margin =
+            '10px 0';
+
+        resultBox.style.padding =
+            '10px 12px';
+
+        resultBox.style.border =
+            '1px solid #b8bdc1';
+
+        resultBox.style.background =
+            '#f7f8f9';
+
+        resultBox.style.fontSize =
+            '12px';
+
+        resultBox.style.whiteSpace =
+            'pre-line';
+
+
+        const errorBox =
+            document.getElementById(
+                'error'
+            );
+
+        errorBox.insertAdjacentElement(
+            'afterend',
+            resultBox
+        );
+    }
+
+
+    resultBox.textContent =
+        'Генериране на Отчетен график...';
+
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/reported/' +
+                objectId +
+                '/' +
+                year +
+                '/' +
+                month +
+                '/generate',
+                {
+                    method:
+                        'POST',
+
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        const data =
+            await response
+                .json()
+                .catch(
+                    () => ({})
+                );
+
+
+        if (!response.ok) {
+
+            let message =
+                data.error ||
+                'Грешка при генериране на Отчетния график';
+
+
+            if (
+                Array.isArray(
+                    data.problems
+                ) &&
+                data.problems.length > 0
+            ) {
+
+                message +=
+                    '\n\n' +
+                    data.problems
+                        .map(
+                            item =>
+                                '• ' + item
+                        )
+                        .join('\n');
+            }
+
+
+            resultBox.textContent =
+                message;
+
+            resultBox.style.background =
+                '#fff2f2';
+
+            resultBox.style.borderColor =
+                '#d79b9b';
+
+            return;
+        }
+
+
+        await loadSchedule();
+
+
+        let message =
+            'Отчетният график е генериран успешно.' +
+            '\n\n' +
+
+            'Норма: ' +
+            data.norm_hours +
+            ' ч.' +
+
+            '\nДопустим максимум: ' +
+            data.max_hours +
+            ' ч.' +
+
+            '\nПреместени/пренаредени смени: ' +
+            Number(
+                data.moved_shifts || 0
+            ) +
+
+            '\nНамалени смени: ' +
+            Number(
+                data.reduced_shifts || 0
+            );
+
+
+        if (
+            Array.isArray(
+                data.employees
+            )
+        ) {
+
+            message +=
+                '\n\nЧасове по служители:';
+
+
+            data.employees.forEach(
+                employee => {
+
+                    message +=
+                        '\n• ' +
+                        employee.employee_name +
+                        ': ' +
+                        employee.hours +
+                        ' ч.';
+                }
+            );
+        }
+
+
+        resultBox.textContent =
+            message;
+
+        resultBox.style.background =
+            '#eef7ee';
+
+        resultBox.style.borderColor =
+            '#9bbb9b';
+
+
+    } catch (error) {
+
+        resultBox.textContent =
+            error.message;
+
+        resultBox.style.background =
+            '#fff2f2';
+
+        resultBox.style.borderColor =
+            '#d79b9b';
+    }
+}
+
+
+/* =====================================================
+   LOAD SCHEDULE
+===================================================== */
+
+async function loadSchedule() {
+
+    closeCellMenu();
+
+
+    const month =
+        Number(
+            document
+                .getElementById(
+                    'monthSelect'
+                )
+                .value
+        );
+
+
+    const year =
+        Number(
+            document
+                .getElementById(
+                    'yearSelect'
+                )
+                .value
+        );
+
+
+    document
+        .getElementById(
+            'monthTitle'
+        )
+        .textContent =
+            'месец ' +
+            monthNames[
+                month - 1
+            ] +
+            ' ' +
+            year +
+            ' г.';
+
+
+    /*
+       Първо гарантираме, че за този
+       обект/месец има Отчетен график.
+
+       При първото отваряне той се
+       копира от основния график.
+
+       При следващи отваряния НЕ се
+       презаписва от основния.
+    */
+
+    const initResponse =
+        await fetch(
+            '/staff-compat-api.php/api/reported/' +
+            objectId +
+            '/' +
+            year +
+            '/' +
+            month +
+            '/initialize',
+            {
+                method:
+                    'POST',
+
+                credentials:
+                    'same-origin'
+            }
+        );
+
+
+    const initData =
+        await initResponse
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!initResponse.ok) {
+
+        throw new Error(
+            initData.error ||
+            'Отчетният график не може да бъде създаден.'
+        );
+    }
+
+
+    /*
+       След initialize четем само
+       reported_entries.
+    */
+
+    const response =
+        await fetch(
+            '/staff-compat-api.php/api/reported/' +
+            objectId +
+            '/' +
+            year +
+            '/' +
+            month,
+            {
+                credentials:
+                    'same-origin'
+            }
+        );
+
+
+    const data =
+        await response
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.error ||
+            'Отчетният график не може да бъде зареден.'
+        );
+    }
+
+
+    scheduleEntries =
+        Array.isArray(
+            data.entries
+        )
+            ? data.entries
+            : [];
+
+
+    await loadWorkCalendar(
+        year,
+        month
+    );
+
+
+    renderSchedule(
+        year,
+        month
+    );
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+
+function reportedShiftCode(
+    shift,
+    entry
+) {
+
+    if (!shift) {
+        return '';
+    }
+
+    const duration =
+        entry
+            ? Number(entry.duration_hours)
+            : calculateShiftHours(
+                shift.time_from,
+                shift.time_to
+              );
+
+    const from =
+        shortTime(
+            shift.time_from
+        );
+
+    const to =
+        shortTime(
+            shift.time_to
+        );
+
+
+    if (
+        from === '07:00' &&
+        to === '19:00'
+    ) {
+
+        if (duration === 8) {
+            return 'Д1-8';
+        }
+
+        if (duration === 6) {
+            return 'Д1-6';
+        }
+
+        return 'Д1';
+    }
+
+
+    if (
+        from === '10:00' &&
+        to === '22:00'
+    ) {
+
+        if (duration === 8) {
+            return 'Д2-8';
+        }
+
+        if (duration === 6) {
+            return 'Д2-6';
+        }
+
+        return 'Д2';
+    }
+
+
+    if (
+        from === '20:00' &&
+        to === '08:00'
+    ) {
+        return 'Н';
+    }
+
+
+    return shift.code || '';
+}
+
+
+
+function reportedShiftTitle(
+    shift,
+    entry
+) {
+
+    if (!shift) {
+        return '';
+    }
+
+    const code =
+        reportedShiftCode(
+            shift,
+            entry
+        );
+
+
+    switch (code) {
+
+        case 'Д1':
+            return 'Дневна смяна от 07:00ч. до 19:00ч.';
+
+        case 'Д1-8':
+            return 'Дневна смяна 8 часа от 07:00ч. до 15:00ч.';
+
+        case 'Д1-6':
+            return 'Дневна смяна 6 часа';
+
+        case 'Д2':
+            return 'Втора дневна от 10:00ч. до 22:00ч.';
+
+        case 'Д2-8':
+            return 'Втора дневна 8 часа от 10:00ч. до 18:00ч.';
+
+        case 'Д2-6':
+            return 'Втора дневна 6 часа';
+
+        case 'Н':
+            return 'Нощна смяна от 20:00ч. до 08:00ч.';
+
+        default:
+            return shift.name || code;
+    }
+}
+
+
+
+function renderSchedule(
+    year,
+    month
+) {
+
+    const wrapper =
+        document.getElementById(
+            'tableWrapper'
+        );
+
+
+    const daysInMonth =
+        new Date(
+            year,
+            month,
+            0
+        )
+        .getDate();
+
+
+    let html =
+        '<table>';
+
+
+    html +=
+        '<thead><tr>';
+
+
+    html +=
+        '<th class="num-head">№</th>';
+
+
+    html +=
+        '<th class="employee-head">Служител</th>';
+
+
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        const date =
+            new Date(
+                year,
+                month - 1,
+                day
+            );
+
+
+        const weekday =
+            date.getDay();
+
+
+        const nonWorkday =
+            isCalendarNonWorkday(
+                year,
+                month,
+                day
+            );
+
+
+        const holidayTitle =
+            calendarDayTitle(
+                year,
+                month,
+                day
+            );
+
+
+        html +=
+            '<th class="day-head ' +
+            calendarDayClass(
+                year,
+                month,
+                day
+            ) +
+            '" ' +
+
+            (
+                holidayTitle
+                    ? 'title="' +
+                      escapeHtml(
+                          holidayTitle
+                      ) +
+                      '"'
+                    : ''
+            ) +
+
+            '>' +
+
+            '<span class="weekday">' +
+            weekdayNames[
+                weekday
+            ] +
+            '</span>' +
+
+            '<span class="day-number">' +
+            day +
+            '</span>' +
+
+            '</th>';
+    }
+
+
+    html +=
+        '<th class="stats-head">Раб.<br>дни</th>';
+
+    html +=
+        '<th class="stats-head">Часове</th>';
+
+    html +=
+        '<th class="stats-head">Нощни<br>часове</th>';
+
+    html +=
+        '<th class="stats-head">Празнични<br>часове</th>';
+
+    html +=
+        '<th class="stats-head">Деж.</th>';
+
+    html +=
+        '<th class="stats-head">Отпуск</th>';
+
+    html +=
+        '<th class="stats-head">Болн.</th>';
+
+
+    html +=
+        '</tr></thead>';
+
+
+    html +=
+        '<tbody>';
+
+
+
+    employees.forEach(
+        (employee, index) => {
+
+            html +=
+                '<tr>';
+
+
+            html +=
+                '<td class="employee-number">' +
+                (index + 1) +
+                '</td>';
+
+
+            html +=
+                '<td class="employee-name">';
+
+
+            html +=
+                '<div class="employee-row-content">';
+
+
+            html +=
+                '<div class="employee-info">';
+
+
+            html +=
+                '<div class="employee-main-name">' +
+                escapeHtml(
+                    employee.name
+                ) +
+                '</div>';
+
+
+            if (
+                employee.position_name
+            ) {
+
+                html +=
+                    '<div class="employee-position">' +
+                    escapeHtml(
+                        employee.position_name
+                    ) +
+                    '</div>';
+            }
+
+
+            html +=
+                '</div>';
+
+
+
+            if (
+                currentUser
+            ) {
+
+                html +=
+                    '<div class="employee-actions">' +
+
+                    '<button onclick="event.stopPropagation();openEmployeeModal(' +
+                    Number(employee.id) +
+                    ')">✎</button>' +
+
+                    '<button class="delete" onclick="event.stopPropagation();deleteEmployee(' +
+                    Number(employee.id) +
+                    ')">×</button>' +
+
+                    '</div>';
+            }
+
+
+            html +=
+                '</div></td>';
+
+
+
+            for (
+                let day = 1;
+                day <= daysInMonth;
+                day++
+            ) {
+
+                const dateString =
+                    formatDate(
+                        year,
+                        month,
+                        day
+                    );
+
+
+                const entry =
+                    findEntry(
+                        employee.id,
+                        dateString
+                    );
+
+
+                const shift =
+                    entry
+                        ? findShift(
+                            entry.shift_id
+                        )
+                        : null;
+
+
+                const date =
+                    new Date(
+                        year,
+                        month - 1,
+                        day
+                    );
+
+
+                const weekend =
+                    isCalendarNonWorkday(
+                        year,
+                        month,
+                        day
+                    );
+
+
+                const cssClass =
+                    shift
+                        ? shiftClass(
+                            shift.type
+                        )
+                        : '';
+
+
+                html +=
+                    '<td ' +
+
+                    'class="shift-cell ' +
+                    calendarDayClass(
+                        year,
+                        month,
+                        day
+                    ) + ' ' +
+                    cssClass +
+                    '" ' +
+
+                    'data-employee="' +
+                    employee.id +
+                    '" ' +
+
+                    'data-date="' +
+                    dateString +
+                    '" ' +
+
+                    'onclick="cellClick(event,this)" ' +
+
+                    'title="' +
+                    (
+                        shift
+                            ? escapeHtml(
+                                reportedShiftDynamicTitle(
+                                    shift,
+                                    entry
+                                )
+                            )
+                            : ''
+                    ) +
+                    '">' +
+
+                    (
+                        shift
+                            ? (
+                                shift.type === 'off'
+                                    ? ''
+                                    : escapeHtml(
+                                        reportedShiftCode(
+                                            shift,
+                                            entry
+                                        )
+                                      )
+                              )
+                            : ''
+                    ) +
+
+                    '</td>';
+            }
+
+
+
+            const stats =
+                calculateStats(
+                    employee.id,
+                    year,
+                    month
+                );
+
+
+            html +=
+                '<td class="stat-cell">' +
+                stats.workDays +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell">' +
+                formatHours(
+                    stats.hours
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell">' +
+                formatHours(
+                    stats.nightHours
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell">' +
+                formatHours(
+                    stats.holidayHours || 0
+                ) +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell">' +
+                stats.duties +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell">' +
+                stats.vacation +
+                '</td>';
+
+
+            html +=
+                '<td class="stat-cell">' +
+                stats.sick +
+                '</td>';
+
+
+            html +=
+                '</tr>';
+        }
+    );
+
+
+    html +=
+        '</tbody></table>';
+
+
+    wrapper.innerHTML =
+        html;
+}
+
+
+
+
+/* =====================================================
+   REPORTED SHORT SHIFT TIME
+===================================================== */
+
+function reportedEntryStartTime(
+    shift,
+    entry
+) {
+
+    if (
+        entry &&
+        entry.start_time
+    ) {
+        return shortTime(
+            entry.start_time
+        );
+    }
+
+    return shift
+        ? shortTime(
+            shift.time_from
+          )
+        : '';
+}
+
+
+function addHoursToTime(
+    startTime,
+    hours
+) {
+
+    if (!startTime) {
+        return '';
+    }
+
+    const parts =
+        String(startTime)
+            .substring(0,5)
+            .split(':');
+
+    let minutes =
+        Number(parts[0]) * 60 +
+        Number(parts[1]);
+
+    minutes =
+        (
+            minutes +
+            Number(hours) * 60
+        ) % (24 * 60);
+
+    const hh =
+        String(
+            Math.floor(
+                minutes / 60
+            )
+        ).padStart(2,'0');
+
+    const mm =
+        String(
+            minutes % 60
+        ).padStart(2,'0');
+
+    return hh + ':' + mm;
+}
+
+
+function reportedShiftDynamicTitle(
+    shift,
+    entry
+) {
+
+    if (!shift) {
+        return '';
+    }
+
+    if (
+        !entry ||
+        !['work','duty'].includes(
+            shift.type
+        )
+    ) {
+        return buildShiftDescription(
+            shift
+        );
+    }
+
+    const duration =
+        Number(
+            entry.duration_hours
+        );
+
+    const code =
+        reportedShiftCode(
+            shift,
+            entry
+        );
+
+    const start =
+        reportedEntryStartTime(
+            shift,
+            entry
+        );
+
+    const end =
+        addHoursToTime(
+            start,
+            duration
+        );
+
+    if (
+        !(shortTime(shift.time_from) === '20:00' &&
+          shortTime(shift.time_to) === '08:00') &&
+        [6,8].includes(
+            duration
+        )
+    ) {
+
+        return (
+            code +
+            ' — ' +
+            duration +
+            ' часа, от ' +
+            start +
+            'ч. до ' +
+            end +
+            'ч.'
+        );
+    }
+
+    return reportedShiftTitle(
+        shift,
+        entry
+    );
+}
+
+
+function findSelectedReportedEntry() {
+
+    return scheduleEntries.find(
+        entry =>
+            Number(
+                entry.employee_id
+            ) ===
+            Number(
+                selectedEmployeeId
+            ) &&
+            normalizeDate(
+                entry.work_date
+            ) ===
+            normalizeDate(
+                selectedDate
+            )
+    ) || null;
+}
+
+
+async function editReportedStartTime() {
+
+    closeCellMenu();
+
+    const entry =
+        findSelectedReportedEntry();
+
+    if (!entry) {
+
+        showError(
+            'В клетката няма отчетна смяна.'
+        );
+
+        return;
+    }
+
+
+    const shift =
+        findShift(
+            entry.shift_id
+        );
+
+    if (
+        !shift ||
+        !['work','duty'].includes(
+            shift.type
+        )
+    ) {
+
+        showError(
+            'Начален час може да се променя само на работна смяна.'
+        );
+
+        return;
+    }
+
+
+    const duration =
+        Number(
+            entry.duration_hours
+        );
+
+    const from = shortTime(shift.time_from);
+    const to = shortTime(shift.time_to);
+
+    if (
+        (from === '20:00' && to === '08:00') ||
+        ![6,8].includes(
+            duration
+        )
+    ) {
+
+        showError(
+            'Началният час може да се променя само при 6 или 8 часови смени.'
+        );
+
+        return;
+    }
+
+
+    const currentStart =
+        reportedEntryStartTime(
+            shift,
+            entry
+        );
+
+
+    const value =
+        prompt(
+            reportedShiftCode(
+                shift,
+                entry
+            ) +
+            '\n\n' +
+            'Продължителност: ' +
+            duration +
+            ' часа (фиксирана)\n' +
+            'Начален час:',
+            currentStart
+        );
+
+
+    if (value === null) {
+        return;
+    }
+
+
+    const startTime =
+        String(value).trim();
+
+
+    if (
+        !/^([01]\d|2[0-3]):[0-5]\d$/.test(
+            startTime
+        )
+    ) {
+
+        showError(
+            'Въведи часа във формат HH:MM, например 22:00.'
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/reported/' +
+                objectId +
+                '/entries/' +
+                Number(entry.id) +
+                '/start-time',
+                {
+                    method:
+                        'PUT',
+
+                    credentials:
+                        'same-origin',
+
+                    headers: {
+                        'Content-Type':
+                            'application/json'
+                    },
+
+                    body:
+                        JSON.stringify({
+                            start_time:
+                                startTime
+                        })
+                }
+            );
+
+
+        const data =
+            await response
+                .json()
+                .catch(
+                    () => ({})
+                );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при запис на началния час'
+            );
+        }
+
+
+        await loadSchedule();
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+    }
+}
+
+
+
+/* =====================================================
+   CELL MENU
+===================================================== */
+
+function cellClick(
+    event,
+    cell
+) {
+
+    if (
+        !currentUser
+    ) {
+        return;
+    }
+
+
+    event.stopPropagation();
+
+
+    selectedEmployeeId =
+        Number(
+            cell.dataset.employee
+        );
+
+
+    selectedDate =
+        cell.dataset.date;
+
+
+    openCellMenu(
+        event.clientX,
+        event.clientY
+    );
+}
+
+
+
+function openCellMenu(
+    x,
+    y
+) {
+
+    const menu =
+        document.getElementById(
+            'cellMenu'
+        );
+
+
+    menu.innerHTML =
+        '';
+
+
+    shifts.forEach(
+        shift => {
+
+            const button =
+                document.createElement(
+                    'button'
+                );
+
+
+            button.textContent =
+                shift.code +
+                ' - ' +
+                shift.name;
+
+
+            button.onclick =
+                function(event) {
+
+                    event.stopPropagation();
+
+                    saveCell(
+                        shift.id
+                    );
+                };
+
+
+            menu.appendChild(
+                button
+            );
+        }
+    );
+
+
+    /*
+       При 6 / 8 часова работна смяна
+       показваме отделен бутон за началния час.
+       Продължителността НЕ се редактира.
+    */
+
+    const selectedEntry =
+        findSelectedReportedEntry();
+
+
+    if (selectedEntry) {
+
+        const selectedShift =
+            findShift(
+                selectedEntry.shift_id
+            );
+
+        const selectedDuration =
+            Number(
+                selectedEntry.duration_hours
+            );
+
+
+        if (
+            selectedShift &&
+            ['work','duty'].includes(
+                selectedShift.type
+            ) &&
+            !(shortTime(selectedShift.time_from) === '20:00' &&
+              shortTime(selectedShift.time_to) === '08:00') &&
+            [6,8].includes(
+                selectedDuration
+            )
+        ) {
+
+            const timeButton =
+                document.createElement(
+                    'button'
+                );
+
+
+            const currentStart =
+                reportedEntryStartTime(
+                    selectedShift,
+                    selectedEntry
+                );
+
+
+            const currentEnd =
+                addHoursToTime(
+                    currentStart,
+                    selectedDuration
+                );
+
+
+            timeButton.textContent =
+                '⏱ Начален час ' +
+                currentStart +
+                ' → ' +
+                currentEnd;
+
+
+            timeButton.onclick =
+                function(event) {
+
+                    event.stopPropagation();
+
+                    editReportedStartTime();
+                };
+
+
+            menu.appendChild(
+                timeButton
+            );
+        }
+    }
+
+
+    const clearButton =
+        document.createElement(
+            'button'
+        );
+
+
+    clearButton.textContent =
+        '✕ Изчисти клетката';
+
+
+    clearButton.onclick =
+        function(event) {
+
+            event.stopPropagation();
+
+            saveCell(
+                null
+            );
+        };
+
+
+    menu.appendChild(
+        clearButton
+    );
+
+
+    menu.style.display =
+        'block';
+
+
+    if (
+        x + 230 >
+        window.innerWidth
+    ) {
+
+        x =
+            window.innerWidth -
+            240;
+    }
+
+
+    menu.style.left =
+        x + 'px';
+
+
+    menu.style.top =
+        y + 'px';
+}
+
+
+
+function closeCellMenu() {
+
+    document
+        .getElementById(
+            'cellMenu'
+        )
+        .style.display =
+            'none';
+}
+
+
+
+document.addEventListener(
+    'click',
+    closeCellMenu
+);
+
+
+
+async function saveCell(
+    shiftId,
+    force = false
+) {
+
+    closeCellMenu();
+
+
+    try {
+
+        const year =
+            Number(
+                document
+                    .getElementById(
+                        'yearSelect'
+                    )
+                    .value
+            );
+
+
+        const month =
+            Number(
+                document
+                    .getElementById(
+                        'monthSelect'
+                    )
+                    .value
+            );
+
+
+        const response =
+            await fetch(
+                '/staff-compat-api.php/api/reported/' +
+                objectId +
+                '/entry',
+                {
+                    method:
+                        'PUT',
+
+                    credentials:
+                        'same-origin',
+
+                    headers: {
+                        'Content-Type':
+                            'application/json'
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            year:
+                                year,
+
+                            month:
+                                month,
+
+                            employee_id:
+                                selectedEmployeeId,
+
+                            work_date:
+                                selectedDate,
+
+                            shift_id:
+                                shiftId
+                        })
+                }
+            );
+
+
+        const data =
+            await response
+                .json()
+                .catch(
+                    () => ({})
+                );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'Грешка при запис в отчетния график'
+            );
+        }
+
+
+        await loadSchedule();
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+    }
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+function calculateStats(
+    employeeId,
+    year,
+    month
+) {
+
+    let workDays = 0;
+    let hours = 0;
+    let nightHours = 0;
+    let holidayHours = 0;
+    let duties = 0;
+    let vacation = 0;
+    let sick = 0;
+
+
+    scheduleEntries.forEach(
+        entry => {
+
+            if (
+                Number(
+                    entry.employee_id
+                ) !==
+                Number(
+                    employeeId
+                )
+            ) {
+                return;
+            }
+
+
+            const entryDate =
+                normalizeDate(
+                    entry.work_date
+                );
+
+
+            if (
+                Number(
+                    entryDate.substring(
+                        0,
+                        4
+                    )
+                ) !== year ||
+                Number(
+                    entryDate.substring(
+                        5,
+                        7
+                    )
+                ) !== month
+            ) {
+                return;
+            }
+
+
+            const shift =
+                findShift(
+                    entry.shift_id
+                );
+
+
+            if (!shift) {
+                return;
+            }
+
+
+            if (
+                Number(
+                    shift.counts_as_work_day
+                ) === 1
+            ) {
+
+                workDays++;
+            }
+
+
+            if (
+                shift.type ===
+                'work'
+            ) {
+
+                const durationHours =
+                    [6, 8, 9, 12].includes(
+                        Number(
+                            entry.duration_hours
+                        )
+                    )
+                        ? Number(
+                            entry.duration_hours
+                          )
+                        : calculateShiftHours(
+                            shift.time_from,
+                            shift.time_to
+                          );
+
+
+                hours +=
+                    durationHours;
+
+
+                nightHours +=
+                    calculateReportedNightHours(
+                        shift.time_from,
+                        durationHours
+                    );
+
+
+                holidayHours +=
+                    calculateReportedHolidayHours(
+                        entryDate,
+                        shift.time_from,
+                        durationHours
+                    );
+            }
+
+
+            if (
+                shift.type ===
+                'duty'
+            ) {
+
+                duties++;
+
+
+                const durationHours =
+                    [6, 8, 9, 12].includes(
+                        Number(
+                            entry.duration_hours
+                        )
+                    )
+                        ? Number(
+                            entry.duration_hours
+                          )
+                        : calculateShiftHours(
+                            shift.time_from,
+                            shift.time_to
+                          );
+
+
+                hours +=
+                    durationHours;
+
+
+                nightHours +=
+                    calculateReportedNightHours(
+                        shift.time_from,
+                        durationHours
+                    );
+
+
+                holidayHours +=
+                    calculateReportedHolidayHours(
+                        entryDate,
+                        shift.time_from,
+                        durationHours
+                    );
+            }
+
+
+            if (
+                shift.type ===
+                'vacation'
+            ) {
+
+                vacation++;
+
+
+                /*
+                   Отпускът участва в месечната
+                   норма на работното време.
+
+                   Начисляваме 8 часа само ако
+                   датата е работен ден според
+                   централния календар.
+                */
+
+                const calendarDay =
+                    workCalendarDays.find(
+                        item =>
+                            item.work_date ===
+                            entryDate
+                    );
+
+
+                if (
+                    calendarDay &&
+                    Number(
+                        calendarDay.is_workday
+                    ) === 1
+                ) {
+
+                    hours += 8;
+                }
+            }
+
+
+            if (
+                shift.type ===
+                'sick'
+            ) {
+
+                sick++;
+            }
+        }
+    );
+
+
+    return {
+        workDays,
+        hours,
+        nightHours,
+        holidayHours,
+        duties,
+        vacation,
+        sick
+    };
+}
+
+
+
+
+function calculateHolidayHours(
+    workDate,
+    timeFrom,
+    timeTo
+) {
+
+    if (
+        !workDate ||
+        !timeFrom ||
+        !timeTo
+    ) {
+        return 0;
+    }
+
+
+    const start =
+        timeToMinutes(
+            timeFrom
+        );
+
+
+    let end =
+        timeToMinutes(
+            timeTo
+        );
+
+
+    const overnight =
+        end <= start;
+
+
+    let total = 0;
+
+
+    // =========================================
+    // Първи календарен ден
+    // =========================================
+
+    const firstEnd =
+        overnight
+            ? 24 * 60
+            : end;
+
+
+    const firstMinutes =
+        Math.max(
+            0,
+            firstEnd - start
+        );
+
+
+    const firstCalendarDay =
+        workCalendarDays.find(
+            item =>
+                item.work_date ===
+                workDate
+        );
+
+
+    if (
+        firstCalendarDay &&
+        Number(
+            firstCalendarDay.is_holiday
+        ) === 1
+    ) {
+
+        total +=
+            firstMinutes / 60;
+    }
+
+
+    // =========================================
+    // Следващ календарен ден
+    // =========================================
+
+    if (overnight) {
+
+        const parts =
+            workDate.split('-');
+
+
+        const nextDate =
+            new Date(
+                Number(parts[0]),
+                Number(parts[1]) - 1,
+                Number(parts[2]) + 1
+            );
+
+
+        const nextDateString =
+            nextDate.getFullYear() +
+            '-' +
+            String(
+                nextDate.getMonth() + 1
+            ).padStart(2, '0') +
+            '-' +
+            String(
+                nextDate.getDate()
+            ).padStart(2, '0');
+
+
+        const nextCalendarDay =
+            workCalendarDays.find(
+                item =>
+                    item.work_date ===
+                    nextDateString
+            );
+
+
+        if (
+            nextCalendarDay &&
+            Number(
+                nextCalendarDay.is_holiday
+            ) === 1
+        ) {
+
+            total +=
+                end / 60;
+        }
+    }
+
+
+    return total;
+}
+
+
+
+/* =====================================================
+   REPORTED HOURS HELPERS
+   Продължителност на конкретната отчетна смяна:
+   12 / 9 / 8 / 6 часа
+===================================================== */
+
+function calculateReportedNightHours(
+    timeFrom,
+    durationHours
+) {
+
+    if (
+        !timeFrom ||
+        !durationHours
+    ) {
+        return 0;
+    }
+
+
+    const start =
+        timeToMinutes(
+            timeFrom
+        );
+
+
+    const end =
+        start +
+        Number(
+            durationHours
+        ) * 60;
+
+
+    let totalMinutes = 0;
+
+
+    /*
+       Нощен труд 22:00 - 06:00.
+
+       Проверяваме:
+       00:00-06:00 на първата дата
+       22:00-06:00 през следващата полунощ
+    */
+
+    const windows = [
+        [0, 6 * 60],
+        [22 * 60, 30 * 60]
+    ];
+
+
+    windows.forEach(
+        window => {
+
+            const overlapStart =
+                Math.max(
+                    start,
+                    window[0]
+                );
+
+
+            const overlapEnd =
+                Math.min(
+                    end,
+                    window[1]
+                );
+
+
+            if (
+                overlapEnd >
+                overlapStart
+            ) {
+
+                totalMinutes +=
+                    overlapEnd -
+                    overlapStart;
+            }
+        }
+    );
+
+
+    return totalMinutes / 60;
+}
+
+
+
+function calculateReportedHolidayHours(
+    workDate,
+    timeFrom,
+    durationHours
+) {
+
+    if (
+        !workDate ||
+        !timeFrom ||
+        !durationHours
+    ) {
+        return 0;
+    }
+
+
+    const start =
+        timeToMinutes(
+            timeFrom
+        );
+
+
+    const end =
+        start +
+        Number(
+            durationHours
+        ) * 60;
+
+
+    let totalMinutes = 0;
+
+
+    // =========================================
+    // Първа календарна дата
+    // =========================================
+
+    const firstDay =
+        workCalendarDays.find(
+            item =>
+                item.work_date ===
+                workDate
+        );
+
+
+    const firstEnd =
+        Math.min(
+            end,
+            24 * 60
+        );
+
+
+    if (
+        firstDay &&
+        Number(
+            firstDay.is_holiday
+        ) === 1 &&
+        firstEnd > start
+    ) {
+
+        totalMinutes +=
+            firstEnd -
+            start;
+    }
+
+
+    // =========================================
+    // Следваща календарна дата
+    // =========================================
+
+    if (
+        end >
+        24 * 60
+    ) {
+
+        const parts =
+            workDate.split('-');
+
+
+        const nextDate =
+            new Date(
+                Number(parts[0]),
+                Number(parts[1]) - 1,
+                Number(parts[2]) + 1
+            );
+
+
+        const nextDateString =
+            nextDate.getFullYear() +
+            '-' +
+            String(
+                nextDate.getMonth() + 1
+            ).padStart(2, '0') +
+            '-' +
+            String(
+                nextDate.getDate()
+            ).padStart(2, '0');
+
+
+        const nextDay =
+            workCalendarDays.find(
+                item =>
+                    item.work_date ===
+                    nextDateString
+            );
+
+
+        if (
+            nextDay &&
+            Number(
+                nextDay.is_holiday
+            ) === 1
+        ) {
+
+            totalMinutes +=
+                end -
+                24 * 60;
+        }
+    }
+
+
+    return totalMinutes / 60;
+}
+
+
+
+function calculateShiftHours(
+    timeFrom,
+    timeTo
+) {
+
+    if (
+        !timeFrom ||
+        !timeTo
+    ) {
+        return 0;
+    }
+
+
+    const from =
+        timeToMinutes(
+            timeFrom
+        );
+
+
+    let to =
+        timeToMinutes(
+            timeTo
+        );
+
+
+    if (
+        to < from
+    ) {
+
+        to +=
+            24 * 60;
+    }
+
+
+    return (
+        to - from
+    ) / 60;
+}
+
+
+
+
+function calculateNightHours(
+    timeFrom,
+    timeTo
+) {
+
+    if (
+        !timeFrom ||
+        !timeTo
+    ) {
+        return 0;
+    }
+
+
+    const start =
+        timeToMinutes(
+            timeFrom
+        );
+
+
+    let end =
+        timeToMinutes(
+            timeTo
+        );
+
+
+    if (
+        end <= start
+    ) {
+        end +=
+            24 * 60;
+    }
+
+
+    let total = 0;
+
+
+    /*
+       Нощен труд:
+       22:00 - 06:00
+
+       Проверяваме два нощни прозореца,
+       за да покрием смяна през полунощ.
+    */
+
+    const windows = [
+        [22 * 60, 30 * 60],
+        [-2 * 60, 6 * 60]
+    ];
+
+
+    for (
+        const [nightStart, nightEnd]
+        of windows
+    ) {
+
+        const overlapStart =
+            Math.max(
+                start,
+                nightStart
+            );
+
+
+        const overlapEnd =
+            Math.min(
+                end,
+                nightEnd
+            );
+
+
+        if (
+            overlapEnd >
+            overlapStart
+        ) {
+
+            total +=
+                overlapEnd -
+                overlapStart;
+        }
+    }
+
+
+    return total / 60;
+}
+
+
+function timeToMinutes(
+    value
+) {
+
+    const parts =
+        String(value)
+            .split(':');
+
+
+    return (
+        Number(parts[0]) *
+            60 +
+        Number(parts[1])
+    );
+}
+
+
+
+function formatHours(
+    hours
+) {
+
+    return Number.isInteger(
+        hours
+    )
+        ? hours
+        : hours.toFixed(1);
+}
+
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function findEntry(
+    employeeId,
+    dateString
+) {
+
+    return scheduleEntries.find(
+        entry =>
+            Number(
+                entry.employee_id
+            ) ===
+                Number(
+                    employeeId
+                ) &&
+
+            normalizeDate(
+                entry.work_date
+            ) ===
+                dateString
+    );
+}
+
+
+
+function findShift(
+    shiftId
+) {
+
+    return shifts.find(
+        shift =>
+            Number(
+                shift.id
+            ) ===
+            Number(
+                shiftId
+            )
+    );
+}
+
+
+
+function shiftClass(
+    type
+) {
+
+    switch (type) {
+
+        case 'work':
+            return 'shift-work';
+
+        case 'duty':
+            return 'shift-duty';
+
+        case 'off':
+            return 'shift-off';
+
+        case 'vacation':
+            return 'shift-vacation';
+
+        case 'sick':
+            return 'shift-sick';
+
+        default:
+            return '';
+    }
+}
+
+
+
+function formatDate(
+    year,
+    month,
+    day
+) {
+
+    return (
+        year +
+        '-' +
+        String(month)
+            .padStart(
+                2,
+                '0'
+            ) +
+        '-' +
+        String(day)
+            .padStart(
+                2,
+                '0'
+            )
+    );
+}
+
+
+
+function normalizeDate(
+    value
+) {
+
+    if (!value) {
+        return '';
+    }
+
+
+    return String(value)
+        .substring(
+            0,
+            10
+        );
+}
+
+
+
+/* =====================================================
+   API
+===================================================== */
+
+async function apiFetch(
+    url
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                url,
+                {
+                    credentials:
+                        'same-origin'
+                }
+            );
+
+
+        if (
+            response.status ===
+            401
+        ) {
+
+            window.location.href =
+                '/login.php';
+
+            return null;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                'API грешка'
+            );
+        }
+
+
+        return data;
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+
+        return null;
+    }
+}
+
+
+
+/* =====================================================
+   ERRORS
+===================================================== */
+
+function showError(
+    message
+) {
+
+    const box =
+        document.getElementById(
+            'error'
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.style.display =
+        'block';
+
+
+    setTimeout(
+        () => {
+
+            box.style.display =
+                'none';
+
+        },
+        7000
+    );
+}
+
+
+
+function showEmployeeModalError(
+    message
+) {
+
+    const box =
+        document.getElementById(
+            'employeeModalError'
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.style.display =
+        'block';
+}
+
+
+
+
+/* =====================================================
+   AUTO LOAD MONTH / YEAR
+===================================================== */
+
+document
+    .getElementById('monthSelect')
+    .addEventListener(
+        'change',
+        async function() {
+            await loadSchedule();
+        }
+    );
+
+
+document
+    .getElementById('yearSelect')
+    .addEventListener(
+        'change',
+        async function() {
+            await loadSchedule();
+        }
+    );
+
+
+/* =====================================================
+   PDF / NAV
+===================================================== */
+
+function exportPDF() {
+
+    window.print();
+}
+
+
+
+/* =====================================================
+   PLAN SCHEDULE - MAX 160 HOURS
+   PRINT ONLY - NOTHING IS SAVED IN DATABASE
+===================================================== */
+
+function exportPlan160() {
+
+    const extraEmployeeName =
+        prompt(
+            'Име на допълнителния служител:',
+            'Допълнителен служител'
+        );
+
+
+    if (
+        extraEmployeeName === null
+    ) {
+        return;
+    }
+
+
+    const name =
+        extraEmployeeName.trim() ||
+        'Допълнителен служител';
+
+
+    const originalTable =
+        document.querySelector(
+            '#tableWrapper table'
+        );
+
+
+    if (!originalTable) {
+
+        showError(
+            'Няма зареден график.'
+        );
+
+        return;
+    }
+
+
+    /*
+        Копираме текущата таблица.
+
+        Промените по-долу са САМО
+        върху копието за печат.
+    */
+    const table =
+        originalTable.cloneNode(
+            true
+        );
+
+
+    /*
+        Махаме бутоните за редакция
+        от print копието.
+    */
+    table
+        .querySelectorAll(
+            '.employee-actions'
+        )
+        .forEach(
+            element =>
+                element.remove()
+        );
+
+
+    table
+        .querySelectorAll(
+            '.shift-cell'
+        )
+        .forEach(
+            cell => {
+
+                cell.removeAttribute(
+                    'onclick'
+                );
+            }
+        );
+
+
+    const tbody =
+        table.querySelector(
+            'tbody'
+        );
+
+
+    if (!tbody) {
+
+        showError(
+            'Не може да се създаде планов график.'
+        );
+
+        return;
+    }
+
+
+    /*
+        Намираме смяната П,
+        за да я използваме визуално,
+        когато работна смяна е преместена.
+    */
+    const offShift =
+        shifts.find(
+            shift =>
+                shift.type === 'off'
+        );
+
+
+    /*
+        Тук събираме смените,
+        които трябва да бъдат
+        прехвърлени.
+    */
+    const movedEntries = [];
+
+
+    employees.forEach(
+        employee => {
+
+            let employeeHours = 0;
+
+            const entries =
+                scheduleEntries
+
+                    .filter(
+                        entry =>
+                            Number(
+                                entry.employee_id
+                            ) ===
+                            Number(
+                                employee.id
+                            )
+                    )
+
+                    .slice()
+
+                    .sort(
+                        (a, b) =>
+                            normalizeDate(
+                                a.work_date
+                            )
+                            .localeCompare(
+                                normalizeDate(
+                                    b.work_date
+                                )
+                            )
+                    );
+
+
+            entries.forEach(
+                entry => {
+
+                    const shift =
+                        findShift(
+                            entry.shift_id
+                        );
+
+
+                    if (
+                        !shift ||
+                        shift.type !== 'work'
+                    ) {
+                        return;
+                    }
+
+
+                    const shiftHours =
+                        calculateShiftHours(
+                            shift.time_from,
+                            shift.time_to
+                        );
+
+
+                    /*
+                        Ако цялата смяна не може
+                        да се побере до 160 часа,
+                        прехвърляме цялата смяна.
+                    */
+                    if (
+                        employeeHours +
+                        shiftHours >
+                        160
+                    ) {
+
+                        const date =
+                            normalizeDate(
+                                entry.work_date
+                            );
+
+
+                        movedEntries.push({
+                            employeeId:
+                                Number(
+                                    employee.id
+                                ),
+
+                            date:
+                                date,
+
+                            shift:
+                                shift,
+
+                            hours:
+                                shiftHours
+                        });
+
+
+                        /*
+                            В print копието
+                            реалният служител
+                            получава П.
+                        */
+                        const cell =
+                            table.querySelector(
+                                '.shift-cell' +
+                                '[data-employee="' +
+                                employee.id +
+                                '"]' +
+                                '[data-date="' +
+                                date +
+                                '"]'
+                            );
+
+
+                        if (cell) {
+
+                            cell.textContent =
+                                offShift
+                                    ? offShift.code
+                                    : 'П';
+
+
+                            cell.title =
+                                offShift
+                                    ? offShift.name
+                                    : 'Почивка';
+
+
+                            cell.className =
+                                'shift-cell';
+
+
+                            const d =
+                                new Date(
+                                    date +
+                                    'T12:00:00'
+                                );
+
+
+                            if (
+                                d.getDay() === 0 ||
+                                d.getDay() === 6
+                            ) {
+
+                                cell.classList.add(
+                                    'weekend'
+                                );
+                            }
+
+
+                            if (offShift) {
+
+                                const cls =
+                                    shiftClass(
+                                        offShift.type
+                                    );
+
+                                if (cls) {
+
+                                    cell.classList.add(
+                                        cls
+                                    );
+                                }
+                            }
+                        }
+
+
+                        return;
+                    }
+
+
+                    employeeHours +=
+                        shiftHours;
+                }
+            );
+
+
+            /*
+                Поправяме статистиката
+                на реалния служител
+                в print копието.
+            */
+            const movedForEmployee =
+                movedEntries.filter(
+                    item =>
+                        item.employeeId ===
+                        Number(
+                            employee.id
+                        )
+                );
+
+
+            if (
+                movedForEmployee.length >
+                0
+            ) {
+
+                const rowCell =
+                    table.querySelector(
+                        '.shift-cell' +
+                        '[data-employee="' +
+                        employee.id +
+                        '"]'
+                    );
+
+
+                if (rowCell) {
+
+                    const row =
+                        rowCell.closest(
+                            'tr'
+                        );
+
+
+                    if (row) {
+
+                        const statCells =
+                            row.querySelectorAll(
+                                '.stat-cell'
+                            );
+
+
+                        const originalStats =
+                            calculateStats(
+                                employee.id,
+                                Number(
+                                    rowCell.dataset.date
+                                        .substring(
+                                            0,
+                                            4
+                                        )
+                                ),
+                                Number(
+                                    rowCell.dataset.date
+                                        .substring(
+                                            5,
+                                            7
+                                        )
+                                )
+                            );
+
+
+                        let movedHours = 0;
+                        let movedWorkDays = 0;
+
+
+                        movedForEmployee.forEach(
+                            item => {
+
+                                movedHours +=
+                                    item.hours;
+
+
+                                if (
+                                    Number(
+                                        item.shift
+                                            .counts_as_work_day
+                                    ) === 1
+                                ) {
+
+                                    movedWorkDays++;
+                                }
+                            }
+                        );
+
+
+                        if (
+                            statCells.length >= 5
+                        ) {
+
+                            statCells[0]
+                                .textContent =
+                                Math.max(
+                                    0,
+                                    originalStats.workDays -
+                                    movedWorkDays
+                                );
+
+
+                            statCells[1]
+                                .textContent =
+                                formatHours(
+                                    Math.max(
+                                        0,
+                                        originalStats.hours -
+                                        movedHours
+                                    )
+                                );
+                        }
+                    }
+                }
+            }
+        }
+    );
+
+
+    /*
+        Разпределяме преместените смени
+        между необходимия брой
+        допълнителни служители.
+
+        Причината да могат да се появят
+        повече от един е:
+        - не повече от 160 часа;
+        - един човек не може да има
+          две различни смени на една дата.
+    */
+
+    const plannedWorkers = [];
+
+
+    movedEntries.forEach(
+        item => {
+
+            let worker =
+                plannedWorkers.find(
+                    candidate =>
+
+                        candidate.hours +
+                        item.hours <=
+                        160 &&
+
+                        !candidate.dates.has(
+                            item.date
+                        )
+                );
+
+
+            if (!worker) {
+
+                worker = {
+                    hours: 0,
+                    workDays: 0,
+                    dates:
+                        new Set(),
+                    entries: []
+                };
+
+
+                plannedWorkers.push(
+                    worker
+                );
+            }
+
+
+            worker.hours +=
+                item.hours;
+
+
+            if (
+                Number(
+                    item.shift
+                        .counts_as_work_day
+                ) === 1
+            ) {
+
+                worker.workDays++;
+            }
+
+
+            worker.dates.add(
+                item.date
+            );
+
+
+            worker.entries.push(
+                item
+            );
+        }
+    );
+
+
+    const dayHeaders =
+        table.querySelectorAll(
+            'thead .day-head'
+        );
+
+
+    const dayCount =
+        dayHeaders.length;
+
+
+    plannedWorkers.forEach(
+        (worker, workerIndex) => {
+
+            const row =
+                document.createElement(
+                    'tr'
+                );
+
+
+            /*
+                №
+            */
+            const numberCell =
+                document.createElement(
+                    'td'
+                );
+
+
+            numberCell.className =
+                'employee-number';
+
+
+            numberCell.textContent =
+                employees.length +
+                workerIndex +
+                1;
+
+
+            row.appendChild(
+                numberCell
+            );
+
+
+            /*
+                Име
+            */
+            const nameCell =
+                document.createElement(
+                    'td'
+                );
+
+
+            nameCell.className =
+                'employee-name';
+
+
+            const displayName =
+                workerIndex === 0
+                    ? name
+                    : name +
+                      ' ' +
+                      (workerIndex + 1);
+
+
+            nameCell.innerHTML =
+                '<div class="employee-row-content">' +
+                    '<div class="employee-info">' +
+                        '<div class="employee-main-name">' +
+                            escapeHtml(
+                                displayName
+                            ) +
+                        '</div>' +
+                        '<div class="employee-position">' +
+                            'Планов допълнителен служител' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+
+            row.appendChild(
+                nameCell
+            );
+
+
+            /*
+                Дните
+            */
+            for (
+                let day = 1;
+                day <= dayCount;
+                day++
+            ) {
+
+                const cell =
+                    document.createElement(
+                        'td'
+                    );
+
+
+                cell.className =
+                    'shift-cell';
+
+
+                const item =
+                    worker.entries.find(
+                        entry =>
+                            Number(
+                                entry.date.substring(
+                                    8,
+                                    10
+                                )
+                            ) === day
+                    );
+
+
+                if (item) {
+
+                    cell.textContent =
+                        item.shift.code;
+
+
+                    cell.title =
+                        item.shift.name;
+
+
+                    const cls =
+                        shiftClass(
+                            item.shift.type
+                        );
+
+
+                    if (cls) {
+
+                        cell.classList.add(
+                            cls
+                        );
+                    }
+
+
+                    const date =
+                        new Date(
+                            item.date +
+                            'T12:00:00'
+                        );
+
+
+                    if (
+                        date.getDay() === 0 ||
+                        date.getDay() === 6
+                    ) {
+
+                        cell.classList.add(
+                            'weekend'
+                        );
+                    }
+
+                } else {
+
+                    cell.textContent =
+                        offShift
+                            ? offShift.code
+                            : 'П';
+
+
+                    if (offShift) {
+
+                        const cls =
+                            shiftClass(
+                                offShift.type
+                            );
+
+
+                        if (cls) {
+
+                            cell.classList.add(
+                                cls
+                            );
+                        }
+                    }
+
+
+                    /*
+                        Вземаме weekend класа
+                        директно от header-а.
+                    */
+                    if (
+                        dayHeaders[
+                            day - 1
+                        ] &&
+                        dayHeaders[
+                            day - 1
+                        ].classList.contains(
+                            'weekend'
+                        )
+                    ) {
+
+                        cell.classList.add(
+                            'weekend'
+                        );
+                    }
+                }
+
+
+                row.appendChild(
+                    cell
+                );
+            }
+
+
+            /*
+                Статистика
+            */
+
+            const values = [
+                worker.workDays,
+                formatHours(
+                    worker.hours
+                ),
+                0,
+                0,
+                0
+            ];
+
+
+            values.forEach(
+                value => {
+
+                    const cell =
+                        document.createElement(
+                            'td'
+                        );
+
+
+                    cell.className =
+                        'stat-cell';
+
+
+                    cell.textContent =
+                        value;
+
+
+                    row.appendChild(
+                        cell
+                    );
+                }
+            );
+
+
+            tbody.appendChild(
+                row
+            );
+        }
+    );
+
+
+    /*
+        Отваряме отделен прозорец.
+        Текущият график НЕ се променя.
+    */
+
+    const printWindow =
+        window.open(
+            '',
+            '_blank'
+        );
+
+
+    if (!printWindow) {
+
+        showError(
+            'Браузърът блокира прозореца за печат.'
+        );
+
+        return;
+    }
+
+
+    const currentStyles =
+        Array.from(
+            document.querySelectorAll(
+                'style, link[rel="stylesheet"]'
+            )
+        )
+        .map(
+            element =>
+                element.outerHTML
+        )
+        .join(
+            '\n'
+        );
+
+
+    printWindow.document.open();
+
+
+    printWindow.document.write(
+        '<!DOCTYPE html>' +
+
+        '<html lang="bg">' +
+
+        '<head>' +
+
+        '<meta charset="UTF-8">' +
+
+        '<title>Планов график 160 ч.</title>' +
+
+        currentStyles +
+
+        '<style>' +
+
+        'body{' +
+            'background:white;' +
+            'padding:20px;' +
+        '}' +
+
+        '.plan-title{' +
+            'text-align:center;' +
+            'font-size:22px;' +
+            'font-weight:700;' +
+            'margin-bottom:4px;' +
+        '}' +
+
+        '.plan-subtitle{' +
+            'text-align:center;' +
+            'font-size:12px;' +
+            'font-weight:600;' +
+            'margin-bottom:14px;' +
+        '}' +
+
+        '.employee-actions{' +
+            'display:none !important;' +
+        '}' +
+
+        '@media print{' +
+
+            'body{' +
+                'padding:0;' +
+            '}' +
+
+            '.plan-title,' +
+            '.plan-subtitle{' +
+                'display:block !important;' +
+            '}' +
+
+        '}' +
+
+        '</style>' +
+
+        '</head>' +
+
+        '<body>' +
+
+        '<div class="plan-title">' +
+            'ПЛАНОВ ГРАФИК' +
+        '</div>' +
+
+        '<div class="plan-subtitle">' +
+            'Планиране при максимум 160 работни часа на служител' +
+        '</div>' +
+
+        table.outerHTML +
+
+        '</body>' +
+
+        '</html>'
+    );
+
+
+    printWindow.document.close();
+
+
+    printWindow.focus();
+
+
+    setTimeout(
+        () => {
+
+            printWindow.print();
+
+        },
+        300
+    );
+}
+
+
+
+
+/* =====================================================
+   PLAN SCHEDULE 160 HOURS -> EXCEL
+   NOTHING IS SAVED IN DATABASE
+===================================================== */
+
+
+
+
+function exportScheduleExcel() {
+
+    if (typeof XLSX === 'undefined') {
+        showError('Excel библиотеката не е заредена.');
+        return;
+    }
+
+    const month =
+        Number(
+            document.getElementById(
+                'monthSelect'
+            ).value
+        );
+
+    const year =
+        Number(
+            document.getElementById(
+                'yearSelect'
+            ).value
+        );
+
+    const daysInMonth =
+        new Date(
+            year,
+            month,
+            0
+        ).getDate();
+
+    const monthNamesExcel = [
+        '',
+        'Януари',
+        'Февруари',
+        'Март',
+        'Април',
+        'Май',
+        'Юни',
+        'Юли',
+        'Август',
+        'Септември',
+        'Октомври',
+        'Ноември',
+        'Декември'
+    ];
+
+    const weekdayNamesExcel = [
+        'Нд',
+        'Пн',
+        'Вт',
+        'Ср',
+        'Чт',
+        'Пт',
+        'Сб'
+    ];
+
+    const rows = [];
+
+    rows.push([
+        'ГРАФИК'
+    ]);
+
+    rows.push([
+        currentObject
+            ? currentObject.name
+            : ''
+    ]);
+
+    rows.push([
+        'месец ' +
+        monthNamesExcel[month] +
+        ' ' +
+        year +
+        ' г.'
+    ]);
+
+    rows.push([]);
+
+    const weekdayRow = [
+        '',
+        ''
+    ];
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        const date =
+            new Date(
+                year,
+                month - 1,
+                day
+            );
+
+        weekdayRow.push(
+            weekdayNamesExcel[
+                date.getDay()
+            ]
+        );
+    }
+
+    rows.push(
+        weekdayRow
+    );
+
+    const header = [
+        '№',
+        'Служител'
+    ];
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+        header.push(day);
+    }
+
+    rows.push(
+        header
+    );
+
+    employees.forEach(
+        (employee, index) => {
+
+            const row = [
+                index + 1,
+                employee.name
+            ];
+
+            for (
+                let day = 1;
+                day <= daysInMonth;
+                day++
+            ) {
+
+                const date =
+                    formatDate(
+                        year,
+                        month,
+                        day
+                    );
+
+                const entry =
+                    findEntry(
+                        employee.id,
+                        date
+                    );
+
+                const shift =
+                    entry
+                        ? findShift(
+                            entry.shift_id
+                        )
+                        : null;
+
+                row.push(
+                    shift
+                        ? (
+                            shift.type === 'off'
+                                ? ''
+                                : shift.code
+                          )
+                        : ''
+                );
+            }
+
+            rows.push(row);
+        }
+    );
+
+    /*
+       Съставил графика
+    */
+
+    rows.push([]);
+
+    rows.push([
+        '',
+        'Съставил графика: ' +
+        (
+            currentUser
+                ? currentUser.full_name
+                : ''
+        )
+    ]);
+
+    const ws =
+        XLSX.utils.aoa_to_sheet(
+            rows
+        );
+
+    const totalColumns =
+        2 +
+        daysInMonth;
+
+    /*
+       Merge заглавията
+    */
+
+    ws['!merges'] = [
+
+        {
+            s: {r:0,c:0},
+            e: {r:0,c:totalColumns-1}
+        },
+
+        {
+            s: {r:1,c:0},
+            e: {r:1,c:totalColumns-1}
+        },
+
+        {
+            s: {r:2,c:0},
+            e: {r:2,c:totalColumns-1}
+        }
+    ];
+
+    /*
+       Ширина на колоните
+    */
+
+    const cols = [
+        {wch:4},
+        {wch:25}
+    ];
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+        cols.push({
+            wch:4
+        });
+    }
+
+    ws['!cols'] =
+        cols;
+
+    /*
+       Цветове
+    */
+
+    const colors = {
+
+        header:
+            'E7E5DF',
+
+        calendarOff:
+            'C9E3C9',
+
+        calendarHoliday:
+            '9FC89F',
+
+        border:
+            '777777'
+    };
+
+    const border = {
+
+        top: {
+            style:'thin',
+            color:{
+                rgb:colors.border
+            }
+        },
+
+        bottom: {
+            style:'thin',
+            color:{
+                rgb:colors.border
+            }
+        },
+
+        left: {
+            style:'thin',
+            color:{
+                rgb:colors.border
+            }
+        },
+
+        right: {
+            style:'thin',
+            color:{
+                rgb:colors.border
+            }
+        }
+    };
+
+    /*
+       Заглавие
+    */
+
+    ['A1','A2','A3'].forEach(
+        (address,index) => {
+
+            if (!ws[address]) {
+                return;
+            }
+
+            ws[address].s = {
+
+                font:{
+                    bold:true,
+                    sz:
+                        index === 0
+                            ? 18
+                            : 12
+                },
+
+                alignment:{
+                    horizontal:'center',
+                    vertical:'center'
+                }
+            };
+        }
+    );
+
+    /*
+       Таблица
+    */
+
+    const tableStart =
+        4;
+
+    const firstEmployeeRow =
+        6;
+
+    const lastEmployeeRow =
+        firstEmployeeRow +
+        employees.length -
+        1;
+
+    for (
+        let r = tableStart;
+        r <= lastEmployeeRow;
+        r++
+    ) {
+
+        for (
+            let c = 0;
+            c < totalColumns;
+            c++
+        ) {
+
+            const address =
+                XLSX.utils.encode_cell({
+                    r,
+                    c
+                });
+
+            if (!ws[address]) {
+
+                ws[address] = {
+                    t:'s',
+                    v:''
+                };
+            }
+
+            ws[address].s = {
+
+                border,
+
+                alignment:{
+                    horizontal:
+                        c === 1
+                            ? 'left'
+                            : 'center',
+
+                    vertical:'center',
+                    wrapText:true
+                },
+
+                font:{
+                    sz:10
+                }
+            };
+        }
+    }
+
+    /*
+       Заглавни редове
+    */
+
+    [4,5].forEach(
+        r => {
+
+            for (
+                let c = 0;
+                c < totalColumns;
+                c++
+            ) {
+
+                const address =
+                    XLSX.utils.encode_cell({
+                        r,
+                        c
+                    });
+
+                ws[address].s = {
+
+                    border,
+
+                    font:{
+                        bold:true,
+                        sz:9
+                    },
+
+                    fill:{
+                        patternType:'solid',
+
+                        fgColor:{
+                            rgb:
+                                colors.header
+                        }
+                    },
+
+                    alignment:{
+                        horizontal:'center',
+                        vertical:'center'
+                    }
+                };
+            }
+        }
+    );
+
+    /*
+       Централен календар:
+       - почивен/неприсъствен ден = зелено
+       - официален празник = по-тъмно зелено
+    */
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        const calendarDay =
+            getCalendarDay(
+                year,
+                month,
+                day
+            );
+
+        if (!calendarDay) {
+            continue;
+        }
+
+        const isHoliday =
+            Number(
+                calendarDay.is_holiday
+            ) === 1;
+
+        const isNonWorkday =
+            Number(
+                calendarDay.is_workday
+            ) !== 1;
+
+        if (
+            !isHoliday &&
+            !isNonWorkday
+        ) {
+            continue;
+        }
+
+        const fillColor =
+            isHoliday
+                ? colors.calendarHoliday
+                : colors.calendarOff;
+
+        const column =
+            day + 1;
+
+        for (
+            let r = 4;
+            r <= lastEmployeeRow;
+            r++
+        ) {
+
+            const address =
+                XLSX.utils.encode_cell({
+                    r,
+                    c:column
+                });
+
+            if (!ws[address]) {
+                continue;
+            }
+
+            ws[address].s = {
+                ...ws[address].s,
+
+                fill:{
+                    patternType:'solid',
+
+                    fgColor:{
+                        rgb:
+                            fillColor
+                    }
+                }
+            };
+        }
+    }
+
+    /*
+       Print настройки в Excel
+    */
+
+    ws['!margins'] = {
+        left:0.2,
+        right:0.2,
+        top:0.3,
+        bottom:0.3,
+        header:0.1,
+        footer:0.1
+    };
+
+    ws['!pageSetup'] = {
+        orientation:'landscape',
+        fitToWidth:1,
+        fitToHeight:0,
+        paperSize:9
+    };
+
+    const wb =
+        XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        wb,
+        ws,
+        'График'
+    );
+
+    const filename =
+        'Grafik_' +
+        String(month)
+            .padStart(
+                2,
+                '0'
+            ) +
+        '_' +
+        year +
+        '.xlsx';
+
+    XLSX.writeFile(
+        wb,
+        filename
+    );
+}
+
+
+function goBack() {
+
+    window.location.href =
+        'obekti.html';
+}
+
+
+
+async function logout() {
+
+    try {
+
+        await fetch(
+            '/staff-compat-api.php/api/auth/logout',
+            {
+                method:
+                    'POST',
+
+                credentials:
+                    'same-origin'
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+    }
+
+
+    window.location.href =
+        '/login.php';
+}
+
+
+
+/* =====================================================
+   ESCAPE
+===================================================== */
+
+function escapeHtml(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return '';
+    }
+
+
+    return String(value)
+
+        .replaceAll(
+            '&',
+            '&amp;'
+        )
+
+        .replaceAll(
+            '<',
+            '&lt;'
+        )
+
+        .replaceAll(
+            '>',
+            '&gt;'
+        )
+
+        .replaceAll(
+            '"',
+            '&quot;'
+        )
+
+        .replaceAll(
+            "'",
+            '&#039;'
+        );
+}
+
+
+
+/* =====================================================
+   ESC
+===================================================== */
+
+document.addEventListener(
+    'keydown',
+    event => {
+
+        if (
+            event.key ===
+            'Escape'
+        ) {
+
+            closeCellMenu();
+
+            closeEmployeeModal();
+
+            closeShiftModal();
+
+            closeShiftManager();
+        }
+    }
+);
+
+</script>
+
+</body>
+</html>
+
+<style>
+
+/* =====================================================
+   SAFE STATS VISUAL STYLE
+   Same compact look as prognozen
+===================================================== */
+
+.stats-head,
+.stat-cell {
+    width: 35px !important;
+    min-width: 35px !important;
+    max-width: 35px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.stats-head {
+    padding: 2px 1px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 9px !important;
+    font-weight: bold !important;
+    line-height: 10px !important;
+    white-space: normal !important;
+}
+
+.stat-cell {
+    height: 36px !important;
+    padding: 1px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    line-height: normal !important;
+    white-space: nowrap !important;
+}
+
+</style>
+
+<style>
+.employee-code {
+    font-weight: 700;
+    color: #555;
+}
+
+/* =====================================================
+   ОТЧЕТЕН ГРАФИК - КОМПАКТНА ЛЕГЕНДА
+===================================================== */
+
+#legend {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(250px, 1fr));
+    column-gap: 24px;
+    row-gap: 5px;
+
+    padding: 10px 14px;
+    margin-top: 8px;
+
+    background: #f4f8fb;
+    border: 1px solid #cbd5dd;
+    border-radius: 3px;
+}
+
+#legend .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    min-width: 0;
+    padding: 1px 0;
+
+    font-size: 11px;
+    line-height: 1.25;
+}
+
+#legend .legend-code {
+    display: inline-block;
+
+    width: 42px;
+    min-width: 42px;
+
+    font-weight: 700;
+    font-size: 11px;
+
+    color: #18242d;
+}
+
+#legend .legend-row span:last-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* По-малък екран */
+@media (max-width: 1100px) {
+
+    #legend {
+        grid-template-columns: repeat(2, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+
+    #legend {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =====================================================
+   REPORTED SHIFT SETTINGS CARDS
+===================================================== */
+
+#legend.reported-shift-panel {
+    background: #fff;
+    border: 1px solid #cfd8e1;
+    border-radius: 5px;
+    margin: 0 0 14px 0;
+    padding: 14px;
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.reported-shift-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.reported-shift-panel-head h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.reported-shift-info {
+    background: #edf7fd;
+    border: 1px solid #d3e7f3;
+    padding: 7px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.reported-shift-grid {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(145px, 1fr));
+    gap: 10px;
+}
+
+.reported-shift-card {
+    min-height: 105px;
+    border: 1px solid #cbd6df;
+    border-radius: 4px;
+    background: #fff;
+    display: flex;
+    overflow: hidden;
+}
+
+.reported-shift-code {
+    min-width: 54px;
+    width: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eaf4fb;
+    border-right: 1px solid #d4e0e8;
+    font-size: 23px;
+    font-weight: 700;
+    color: #172330;
+}
+
+.reported-shift-card-body {
+    flex: 1;
+    padding: 9px 10px;
+    min-width: 0;
+}
+
+.reported-shift-name {
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+
+.reported-shift-line {
+    margin-top: 5px;
+}
+
+.reported-time-row {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.reported-time-row input[type="time"] {
+    width: 100%;
+    min-width: 82px;
+    box-sizing: border-box;
+    border: 1px solid #b7c4cf;
+    border-radius: 4px;
+    padding: 4px 5px;
+    font: inherit;
+    background: #fff;
+}
+
+.reported-time-end {
+    padding: 5px 6px;
+    border-radius: 4px;
+    background: #f1f3f5;
+    border: 1px solid #d8dde1;
+}
+
+.reported-shift-hours {
+    margin-top: 7px;
+    font-weight: 600;
+}
+
+.reported-shift-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.reported-shift-save {
+    background: #1777ee;
+    color: #fff;
+    border: 1px solid #1777ee;
+    border-radius: 4px;
+    padding: 9px 14px;
+    cursor: pointer;
+}
+
+.reported-shift-reset {
+    background: #f5f6f7;
+    border: 1px solid #cbd1d6;
+    border-radius: 4px;
+    padding: 9px 14px;
+    cursor: pointer;
+}
+
+.reported-shift-message {
+    margin-top: 8px;
+    min-height: 16px;
+    font-weight: 600;
+}
+
+@media (max-width: 1600px) {
+    .reported-shift-grid {
+        grid-template-columns: repeat(6, minmax(145px, 1fr));
+    }
+}
+
+@media (max-width: 1200px) {
+    .reported-shift-grid {
+        grid-template-columns: repeat(4, minmax(145px, 1fr));
+    }
+}
+
+@media (max-width: 750px) {
+    .reported-shift-grid {
+        grid-template-columns: repeat(2, minmax(145px, 1fr));
+    }
+}
+
+
+
+/* ===== COMPACT SHIFT PANEL V2 ===== */
+
+/* Целият блок - точно по ширината на графика */
+#legend.reported-shift-panel {
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 0 10px 0 !important;
+    padding: 8px 10px !important;
+
+    background: #fff !important;
+    border: 1px solid #cfd8e1 !important;
+    border-radius: 4px !important;
+
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+}
+
+
+/* Заглавие + инфо на един ред */
+.reported-shift-panel-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 10px !important;
+    margin: 0 0 7px 0 !important;
+}
+
+
+.reported-shift-panel-head h3 {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 18px !important;
+    line-height: 1 !important;
+}
+
+
+.reported-shift-info {
+    margin: 0 !important;
+    padding: 5px 8px !important;
+
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+
+    white-space: nowrap !important;
+
+    background: #eef8fd !important;
+    border: 1px solid #d5e8f2 !important;
+    border-radius: 3px !important;
+}
+
+
+/* 8 карти на ред */
+.reported-shift-grid {
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(8, minmax(0, 1fr)) !important;
+
+    gap: 6px !important;
+
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+/* Самата карта */
+.reported-shift-card {
+    display: flex !important;
+
+    min-width: 0 !important;
+    width: auto !important;
+
+    min-height: 74px !important;
+    height: 74px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    background: #fff !important;
+    border: 1px solid #c7d3dd !important;
+    border-radius: 3px !important;
+
+    box-shadow: none !important;
+}
+
+
+/* Код Д1, Д1-8 и т.н. */
+.reported-shift-code {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    flex: 0 0 48px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+
+    padding: 0 !important;
+
+    background: #e9f4fb !important;
+    border-right: 1px solid #d1dee7 !important;
+
+    color: #172432 !important;
+
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
+
+/* Дясната част */
+.reported-shift-card-body {
+    flex: 1 1 auto !important;
+
+    min-width: 0 !important;
+
+    padding: 6px 7px !important;
+
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+
+    overflow: hidden !important;
+}
+
+
+.reported-shift-name {
+    margin: 0 0 4px 0 !important;
+
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+
+    white-space: normal !important;
+}
+
+
+/* Обикновените часове */
+.reported-shift-line {
+    margin: 2px 0 0 0 !important;
+
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+
+    white-space: nowrap !important;
+}
+
+
+/* Начало / край */
+.reported-time-row {
+    display: grid !important;
+
+    grid-template-columns: 35px minmax(0, 1fr) !important;
+
+    align-items: center !important;
+    gap: 3px !important;
+
+    margin: 2px 0 0 0 !important;
+
+    font-size: 9px !important;
+    line-height: 1 !important;
+}
+
+
+.reported-time-row input[type="time"] {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    height: 24px !important;
+
+    box-sizing: border-box !important;
+
+    padding: 1px 3px !important;
+
+    border: 1px solid #bdc9d2 !important;
+    border-radius: 3px !important;
+
+    background: #fff !important;
+
+    font-size: 10px !important;
+    line-height: 1 !important;
+}
+
+
+/* Автоматичен край */
+.reported-time-end {
+    display: flex !important;
+    align-items: center !important;
+
+    width: 100% !important;
+    height: 24px !important;
+
+    box-sizing: border-box !important;
+
+    padding: 1px 4px !important;
+
+    background: #f2f4f6 !important;
+    border: 1px solid #d8dee3 !important;
+    border-radius: 3px !important;
+
+    font-size: 10px !important;
+}
+
+
+/* 6/8/12 часа */
+.reported-shift-hours {
+    margin: 3px 0 0 0 !important;
+
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+}
+
+
+/* Бутони */
+.reported-shift-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+
+    gap: 6px !important;
+
+    margin: 7px 0 0 0 !important;
+    padding: 0 !important;
+}
+
+
+.reported-shift-save,
+.reported-shift-reset {
+    width: auto !important;
+    min-width: 0 !important;
+    height: 30px !important;
+
+    margin: 0 !important;
+    padding: 4px 10px !important;
+
+    border-radius: 3px !important;
+
+    font-size: 10px !important;
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+}
+
+
+.reported-shift-save {
+    background: #1678e8 !important;
+    border: 1px solid #1678e8 !important;
+    color: white !important;
+}
+
+
+.reported-shift-reset {
+    background: #f5f6f7 !important;
+    border: 1px solid #c9d0d6 !important;
+    color: #1c2730 !important;
+}
+
+
+/* Съобщението да не създава голямо празно място */
+.reported-shift-message {
+    min-height: 0 !important;
+
+    margin: 3px 0 0 0 !important;
+    padding: 0 !important;
+
+    font-size: 9px !important;
+    line-height: 1 !important;
+}
+
+
+/* На малко по-тесен монитор - 4 карти на ред */
+@media (max-width: 1350px) {
+
+    .reported-shift-grid {
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr)) !important;
+    }
+
+}
+
+
+/* Телефон / много тесен прозорец */
+@media (max-width: 700px) {
+
+    .reported-shift-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .reported-shift-info {
+        white-space: normal !important;
+    }
+
+}
+
+/* ===== END COMPACT SHIFT PANEL V2 ===== */
+
+
+
+/* =====================================================
+   FIX REPORTED SHIFT PANEL LAYOUT
+===================================================== */
+
+#legend.reported-shift-panel {
+    display: block !important;
+    grid-template-columns: none !important;
+
+    width: 100% !important;
+    max-width: none !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 0 8px 0 !important;
+    padding: 8px !important;
+
+    background: #fff !important;
+}
+
+
+/* HEADER */
+#legend .reported-shift-panel-head {
+    display: flex !important;
+    width: 100% !important;
+
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    margin: 0 0 6px 0 !important;
+    padding: 0 !important;
+}
+
+
+#legend .reported-shift-panel-head h3 {
+    font-size: 18px !important;
+    margin: 0 !important;
+}
+
+
+#legend .reported-shift-info {
+    max-width: 650px !important;
+    margin-left: auto !important;
+
+    font-size: 10px !important;
+    padding: 5px 8px !important;
+}
+
+
+/* =====================================================
+   8 КАРТИ НА РЕД
+===================================================== */
+
+#legend .reported-shift-grid {
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(8, minmax(0, 1fr)) !important;
+
+    gap: 5px !important;
+
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+/* CARD */
+#legend .reported-shift-card {
+    display: flex !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    height: 82px !important;
+    min-height: 82px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+
+    border: 1px solid #c7d3dd !important;
+    border-radius: 3px !important;
+
+    background: #fff !important;
+}
+
+
+/* CODE */
+#legend .reported-shift-code {
+    flex: 0 0 49px !important;
+
+    width: 49px !important;
+    min-width: 49px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+
+    font-size: 20px !important;
+    font-weight: 700 !important;
+
+    background: #e9f4fb !important;
+}
+
+
+/* CONTENT */
+#legend .reported-shift-card-body {
+    display: block !important;
+
+    flex: 1 1 auto !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+
+    padding: 5px 6px !important;
+
+    overflow: visible !important;
+
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+}
+
+
+#legend .reported-shift-name {
+    display: block !important;
+
+    margin: 0 0 3px 0 !important;
+
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+
+    white-space: normal !important;
+}
+
+
+/* FIXED TIME */
+#legend .reported-shift-line {
+    display: block !important;
+
+    margin: 2px 0 !important;
+
+    font-size: 10px !important;
+    white-space: nowrap !important;
+}
+
+
+/* START / END */
+#legend .reported-time-row {
+    display: grid !important;
+
+    grid-template-columns:
+        34px minmax(0,1fr) !important;
+
+    align-items: center !important;
+
+    gap: 3px !important;
+
+    margin: 2px 0 !important;
+
+    font-size: 9px !important;
+}
+
+
+#legend .reported-time-row input[type="time"] {
+    display: block !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    height: 23px !important;
+
+    padding: 1px 2px !important;
+
+    box-sizing: border-box !important;
+
+    font-size: 10px !important;
+
+    border: 1px solid #bcc8d1 !important;
+    border-radius: 3px !important;
+}
+
+
+#legend .reported-time-end {
+    display: flex !important;
+
+    width: 100% !important;
+    height: 23px !important;
+
+    align-items: center !important;
+
+    padding: 1px 4px !important;
+
+    box-sizing: border-box !important;
+
+    font-size: 10px !important;
+
+    background: #f2f4f6 !important;
+    border: 1px solid #d8dde2 !important;
+    border-radius: 3px !important;
+}
+
+
+#legend .reported-shift-hours {
+    display: block !important;
+
+    margin: 3px 0 0 0 !important;
+
+    font-size: 10px !important;
+    font-weight: 700 !important;
+
+    white-space: nowrap !important;
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+#legend .reported-shift-actions {
+    display: flex !important;
+
+    justify-content: flex-end !important;
+    align-items: center !important;
+
+    width: 100% !important;
+
+    gap: 6px !important;
+
+    margin: 6px 0 0 0 !important;
+    padding: 0 !important;
+}
+
+
+#legend .reported-shift-save,
+#legend .reported-shift-reset {
+    width: auto !important;
+    height: 28px !important;
+
+    margin: 0 !important;
+    padding: 3px 9px !important;
+
+    font-size: 10px !important;
+
+    border-radius: 3px !important;
+}
+
+
+#legend .reported-shift-message {
+    display: block !important;
+
+    width: 100% !important;
+
+    min-height: 0 !important;
+
+    margin: 2px 0 0 0 !important;
+    padding: 0 !important;
+
+    font-size: 9px !important;
+}
+
+
+/* При малък монитор */
+@media (max-width: 1400px) {
+
+    #legend .reported-shift-grid {
+        grid-template-columns:
+            repeat(4, minmax(0,1fr)) !important;
+    }
+}
+
+
+
+
+/* =====================================================
+   TWO ROW SHIFT PANEL
+===================================================== */
+
+#legend.reported-shift-panel {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 0 8px 0 !important;
+    padding: 8px !important;
+}
+
+
+/* ГОРЕН РЕД - ФИКСИРАНИ */
+#legend .reported-fixed-row {
+    display: grid !important;
+    grid-template-columns:
+        repeat(7, minmax(0, 1fr)) !important;
+
+    gap: 6px !important;
+
+    width: 100% !important;
+
+    margin: 0 0 6px 0 !important;
+    padding: 0 !important;
+}
+
+
+/* ДОЛЕН РЕД - НАСТРОЙВАЕМИ */
+#legend .reported-editable-row {
+    display: grid !important;
+    grid-template-columns:
+        repeat(9, minmax(0, 1fr)) !important;
+
+    gap: 6px !important;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #f2fbf3 !important;
+
+    border: 1px solid #d5ead7 !important;
+    border-radius: 4px !important;
+
+    box-sizing: border-box !important;
+
+    padding: 5px !important;
+}
+
+
+/* Картите да са компактни */
+#legend .reported-shift-card {
+    height: 78px !important;
+    min-height: 78px !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* Настройваемите да се отличават леко */
+#legend .reported-editable-row .reported-shift-card {
+    background: #fbfffb !important;
+    border-color: #bcd9c0 !important;
+}
+
+
+#legend .reported-editable-row .reported-shift-code {
+    background: #dff3e2 !important;
+}
+
+
+/* Код */
+#legend .reported-shift-code {
+    flex: 0 0 47px !important;
+    width: 47px !important;
+    min-width: 47px !important;
+
+    font-size: 19px !important;
+}
+
+
+/* Съдържание */
+#legend .reported-shift-card-body {
+    padding: 5px 6px !important;
+    font-size: 10px !important;
+}
+
+
+/* Име */
+#legend .reported-shift-name {
+    font-size: 10px !important;
+    margin-bottom: 3px !important;
+}
+
+
+/* 24 часов формат */
+#legend input[type="time"] {
+    font-variant-numeric: tabular-nums !important;
+}
+
+
+/* Полета начало/край */
+#legend .reported-time-row {
+    grid-template-columns:
+        31px minmax(0, 1fr) !important;
+
+    gap: 2px !important;
+
+    margin: 1px 0 !important;
+}
+
+
+#legend .reported-time-row input[type="time"],
+#legend .reported-time-end {
+    height: 22px !important;
+
+    font-size: 10px !important;
+
+    padding: 1px 3px !important;
+}
+
+
+/* Часове */
+#legend .reported-shift-hours {
+    margin-top: 2px !important;
+    font-size: 9px !important;
+}
+
+
+/* Бутони вдясно */
+#legend .reported-shift-actions {
+    justify-content: flex-end !important;
+    margin-top: 6px !important;
+}
+
+
+/* По-тесни екрани */
+@media (max-width: 1400px) {
+
+    #legend .reported-fixed-row {
+        grid-template-columns:
+            repeat(4, minmax(0,1fr)) !important;
+    }
+
+    #legend .reported-editable-row {
+        grid-template-columns:
+            repeat(5, minmax(0,1fr)) !important;
+    }
+}
+
+@media (max-width: 850px) {
+
+    #legend .reported-fixed-row,
+    #legend .reported-editable-row {
+        grid-template-columns:
+            repeat(2, minmax(0,1fr)) !important;
+    }
+}
+
+
+
+/* =====================================================
+   TWO ROW SHIFT PANEL
+===================================================== */
+
+#legend.reported-shift-panel {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 0 8px 0 !important;
+    padding: 8px !important;
+}
+
+
+/* ГОРЕН РЕД - ФИКСИРАНИ */
+#legend .reported-fixed-row {
+    display: grid !important;
+    grid-template-columns:
+        repeat(7, minmax(0, 1fr)) !important;
+
+    gap: 6px !important;
+
+    width: 100% !important;
+
+    margin: 0 0 6px 0 !important;
+    padding: 0 !important;
+}
+
+
+/* ДОЛЕН РЕД - НАСТРОЙВАЕМИ */
+#legend .reported-editable-row {
+    display: grid !important;
+    grid-template-columns:
+        repeat(9, minmax(0, 1fr)) !important;
+
+    gap: 6px !important;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #f2fbf3 !important;
+
+    border: 1px solid #d5ead7 !important;
+    border-radius: 4px !important;
+
+    box-sizing: border-box !important;
+
+    padding: 5px !important;
+}
+
+
+/* Картите да са компактни */
+#legend .reported-shift-card {
+    height: 78px !important;
+    min-height: 78px !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* Настройваемите да се отличават леко */
+#legend .reported-editable-row .reported-shift-card {
+    background: #fbfffb !important;
+    border-color: #bcd9c0 !important;
+}
+
+
+#legend .reported-editable-row .reported-shift-code {
+    background: #dff3e2 !important;
+}
+
+
+/* Код */
+#legend .reported-shift-code {
+    flex: 0 0 47px !important;
+    width: 47px !important;
+    min-width: 47px !important;
+
+    font-size: 19px !important;
+}
+
+
+/* Съдържание */
+#legend .reported-shift-card-body {
+    padding: 5px 6px !important;
+    font-size: 10px !important;
+}
+
+
+/* Име */
+#legend .reported-shift-name {
+    font-size: 10px !important;
+    margin-bottom: 3px !important;
+}
+
+
+/* 24 часов формат */
+#legend input[type="time"] {
+    font-variant-numeric: tabular-nums !important;
+}
+
+
+/* Полета начало/край */
+#legend .reported-time-row {
+    grid-template-columns:
+        31px minmax(0, 1fr) !important;
+
+    gap: 2px !important;
+
+    margin: 1px 0 !important;
+}
+
+
+#legend .reported-time-row input[type="time"],
+#legend .reported-time-end {
+    height: 22px !important;
+
+    font-size: 10px !important;
+
+    padding: 1px 3px !important;
+}
+
+
+/* Часове */
+#legend .reported-shift-hours {
+    margin-top: 2px !important;
+    font-size: 9px !important;
+}
+
+
+/* Бутони вдясно */
+#legend .reported-shift-actions {
+    justify-content: flex-end !important;
+    margin-top: 6px !important;
+}
+
+
+/* По-тесни екрани */
+@media (max-width: 1400px) {
+
+    #legend .reported-fixed-row {
+        grid-template-columns:
+            repeat(4, minmax(0,1fr)) !important;
+    }
+
+    #legend .reported-editable-row {
+        grid-template-columns:
+            repeat(5, minmax(0,1fr)) !important;
+    }
+}
+
+@media (max-width: 850px) {
+
+    #legend .reported-fixed-row,
+    #legend .reported-editable-row {
+        grid-template-columns:
+            repeat(2, minmax(0,1fr)) !important;
+    }
+}
+
+</style>
