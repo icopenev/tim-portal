@@ -32,3 +32,18 @@ a{accent-color:#333}
 .home-actions a{border-color:#c7ccd0!important;background:linear-gradient(145deg,#fff,#f2f3f4)!important}
 .home-actions a:hover{border-color:#777f85!important;box-shadow:0 8px 22px rgba(20,24,27,.12)!important}
 @media(max-width:700px){.top,.portal-header,body>header,.topbar{padding-left:17px!important;padding-right:17px!important}}
+
+/* TIM SOT corporate watermark */
+body::before{
+  content:"";
+  position:fixed;
+  inset:72px 0 0;
+  z-index:-1;
+  pointer-events:none;
+  background:url("/assets/tim-sot-watermark.svg") center 58% / min(760px,72vw) auto no-repeat;
+  opacity:.045;
+}
+body{position:relative;isolation:isolate}
+@media(max-width:700px){
+  body::before{background-size:88vw auto;opacity:.035}
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 260" role="img" aria-label="ТИМ СОТ">
+  <g fill="#15191c">
+    <text x="40" y="190" font-family="Arial,Helvetica,sans-serif" font-size="170" font-weight="800" letter-spacing="4">ТИМ</text>
+    <path d="M515 40a110 110 0 1 0 0 180V165a58 58 0 1 1 0-70z"/>
+    <path d="M535 40v55a58 58 0 1 1 0 70v55a110 110 0 1 0 0-180z"/>
+    <path d="M690 42h250v54h-94v124h-62V96h-94z"/>
+  </g>
+</svg>
