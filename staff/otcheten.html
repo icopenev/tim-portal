@@ -2499,24 +2499,10 @@ async function renderLegend() {
             ) +
 
             reportedShortCard(
-                'D1',
-                'Д1-6',
-                'Дневна 6 часа',
-                6
-            ) +
-
-            reportedShortCard(
                 'D2',
                 'Д2-8',
                 'Втора 8 часа',
                 8
-            ) +
-
-            reportedShortCard(
-                'D2',
-                'Д2-6',
-                'Втора 6 часа',
-                6
             ) +
 
 
@@ -4197,10 +4183,6 @@ function reportedShiftCode(
             return 'Д1-8';
         }
 
-        if (duration === 6) {
-            return 'Д1-6';
-        }
-
         return 'Д1';
     }
 
@@ -4212,10 +4194,6 @@ function reportedShiftCode(
 
         if (duration === 8) {
             return 'Д2-8';
-        }
-
-        if (duration === 6) {
-            return 'Д2-6';
         }
 
         return 'Д2';
@@ -4259,17 +4237,11 @@ function reportedShiftTitle(
         case 'Д1-8':
             return 'Дневна смяна 8 часа от 07:00ч. до 15:00ч.';
 
-        case 'Д1-6':
-            return 'Дневна смяна 6 часа';
-
         case 'Д2':
             return 'Втора дневна от 10:00ч. до 22:00ч.';
 
         case 'Д2-8':
             return 'Втора дневна 8 часа от 10:00ч. до 18:00ч.';
-
-        case 'Д2-6':
-            return 'Втора дневна 6 часа';
 
         case 'Н':
             return 'Нощна смяна от 20:00ч. до 08:00ч.';
@@ -4786,7 +4758,7 @@ function reportedShiftDynamicTitle(
     if (
         !(shortTime(shift.time_from) === '20:00' &&
           shortTime(shift.time_to) === '08:00') &&
-        [6,8].includes(
+        [8].includes(
             duration
         )
     ) {
@@ -4877,13 +4849,13 @@ async function editReportedStartTime() {
 
     if (
         (from === '20:00' && to === '08:00') ||
-        ![6,8].includes(
+        ![8].includes(
             duration
         )
     ) {
 
         showError(
-            'Началният час може да се променя само при 6 или 8 часови смени.'
+            'Началният час може да се променя само при 8-часова смяна.'
         );
 
         return;
@@ -5110,7 +5082,7 @@ function openCellMenu(
             ) &&
             !(shortTime(selectedShift.time_from) === '20:00' &&
               shortTime(selectedShift.time_to) === '08:00') &&
-            [6,8].includes(
+            [8].includes(
                 selectedDuration
             )
         ) {
@@ -5411,7 +5383,7 @@ function calculateStats(
             ) {
 
                 const durationHours =
-                    [6, 8, 9, 12].includes(
+                    [8, 12].includes(
                         Number(
                             entry.duration_hours
                         )
@@ -5454,7 +5426,7 @@ function calculateStats(
 
 
                 const durationHours =
-                    [6, 8, 9, 12].includes(
+                    [8, 12].includes(
                         Number(
                             entry.duration_hours
                         )
@@ -5680,7 +5652,7 @@ function calculateHolidayHours(
 /* =====================================================
    REPORTED HOURS HELPERS
    Продължителност на конкретната отчетна смяна:
-   12 / 9 / 8 / 6 часа
+   12 / 8 часа
 ===================================================== */
 
 function calculateReportedNightHours(

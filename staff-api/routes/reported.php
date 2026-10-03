@@ -21,7 +21,7 @@ if (preg_match('#^/api/reported/(\d+)/(\d{4})/(\d{1,2})/initialize$#', $path, $m
         $dur = 12;
         if (in_array($e['type'], ['work','duty'], true)) {
             $real = fminutes($e['time_from'], $e['time_to']) / 60;
-            if (in_array($real, [6,8,9,12], true)) {
+            if (in_array($real, [8,12], true)) {
                 $dur = $real;
             }if ($real == 12) {
                 $dur = 12;
@@ -44,8 +44,8 @@ if (preg_match('#^/api/reported/(\d+)/(\d{4})/(\d{1,2})$#', $path, $m) && $metho
 }
 if (preg_match('#^/api/reported/(\d+)/entries/(\d+)/duration$#', $path, $m) && $method === 'PUT') {
     $dur = (int)($in['duration_hours'] ?? 0);
-    if (!in_array($dur, [6,8,12], true)) {
-        out(['error' => 'Продължителността трябва да е 6, 8 или 12 часа'], 400);
+    if (!in_array($dur, [8,12], true)) {
+        out(['error' => 'Продължителността трябва да е 8 или 12 часа'], 400);
     }$q = $db->prepare("SELECT re.id,s.type,s.time_from,s.time_to FROM staff_reported_entries re JOIN staff_reported_schedules rs ON rs.id=re.reported_schedule_id LEFT JOIN staff_shifts s ON s.id=re.shift_id WHERE re.id=? AND rs.object_id=?");
     $q->execute([(int)$m[2],(int)$m[1]]);
     $e = $q->fetch();
@@ -79,7 +79,7 @@ if (preg_match('#^/api/reported/(\d+)/entry$#', $path, $m) && $method === 'PUT')
     if (!$sh) {
         out(['error' => 'Невалидна смяна'], 400);
     }$dur = in_array($sh['type'], ['work','duty'], true) ? fminutes($sh['time_from'], $sh['time_to']) / 60 : 12;
-    if (!in_array($dur, [6,8,9,12], true)) {
+    if (!in_array($dur, [8,12], true)) {
         $dur = 12;
     }$db->prepare("INSERT INTO staff_reported_entries(reported_schedule_id,employee_id,work_date,shift_id,duration_hours,note) VALUES(?,?,?,?,?,?) ON CONFLICT(reported_schedule_id,employee_id,work_date) DO UPDATE SET shift_id=excluded.shift_id,duration_hours=excluded.duration_hours,note=excluded.note,updated_at=CURRENT_TIMESTAMP")->execute([$rid,$eid,$date,(int)$sid,$dur,$in['note'] ?? '']);
     out(['success' => true,'duration_hours' => $dur]);
@@ -93,7 +93,7 @@ if (preg_match('#^/api/reported/(\d+)/entries/(\d+)/start-time$#', $path, $m) &&
 }
 if (preg_match('#^/api/reported/(\d+)/shift-settings$#', $path, $m)) {
     if ($method === 'GET') {
-        $q = $db->prepare("SELECT * FROM staff_reported_shift_settings WHERE object_id=? AND base_code IN ('D1','D2') AND duration_hours IN (6,8) ORDER BY base_code,duration_hours DESC");
+        $q = $db->prepare("SELECT * FROM staff_reported_shift_settings WHERE object_id=? AND base_code IN ('D1','D2') AND duration_hours = 8 ORDER BY base_code,duration_hours DESC");
         $q->execute([(int)$m[1]]);
         out(['settings' => $q->fetchAll()]);
     }if ($method === 'PUT') {
@@ -101,7 +101,7 @@ if (preg_match('#^/api/reported/(\d+)/shift-settings$#', $path, $m)) {
             $base = strtoupper(trim($x['base_code'] ?? ''));
             $dur = (int)($x['duration_hours'] ?? 0);
             $time = trim($x['start_time'] ?? '');
-            if (!in_array($base, ['D1','D2'], true) || !in_array($dur, [6,8], true)) {
+            if (!in_array($base, ['D1','D2'], true) || $dur !== 8) {
                 out(['error' => 'Невалидна настройка'], 400);
             }$q = $db->prepare("INSERT INTO staff_reported_shift_settings(object_id,base_code,duration_hours,start_time) VALUES(?,?,?,?) ON CONFLICT(object_id,base_code,duration_hours) DO UPDATE SET start_time=excluded.start_time,updated_at=CURRENT_TIMESTAMP");
             $q->execute([(int)$m[1],$base,$dur,$time]);
