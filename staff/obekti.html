@@ -19,9 +19,9 @@ body {
 }
 
 header {
-    background: #252b31;
+    background: #183346;
     color: white;
-    padding: 14px 25px;
+    padding: 17px max(24px, calc((100vw - 1100px) / 2));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -40,7 +40,8 @@ header h1 {
 }
 
 .logout-btn,
-.users-btn {
+.users-btn,
+.home-btn {
     border: 1px solid #777;
     background: transparent;
     color: white;
@@ -50,7 +51,8 @@ header h1 {
 }
 
 .logout-btn:hover,
-.users-btn:hover {
+.users-btn:hover,
+.home-btn:hover {
     background: #444;
 }
 
@@ -250,10 +252,10 @@ header h1 {
 
 <header>
 
-    <h1>ГРАФИК</h1>
+    <h1>Графици на служители</h1>
 
     <div class="user-area">
-        <button onclick="window.location.href='/'">Начало</button>
+        <button class="home-btn" onclick="window.location.href='/'">← Начало</button>
 
         <!-- Вижда се само от ADMIN -->
         <button
