@@ -19,9 +19,26 @@ if ($path === '/api/objects' && $method === 'GET') {
 if ($path === '/api/objects' && $method === 'POST') {
     if (!roleAdmin()) {
         out(['error' => 'Нямате права'], 403);
-    }$s = $db->prepare("INSERT INTO staff_objects(name,description) VALUES(?,?)");
-    $s->execute([trim($in['name'] ?? ''),trim($in['description'] ?? '')]);
-    out(['id' => (int)$db->lastInsertId(),'success' => true]);
+    }
+    $db->beginTransaction();
+    try {
+        $s = $db->prepare("INSERT INTO staff_objects(name,description) VALUES(?,?)");
+        $s->execute([trim($in['name'] ?? ''),trim($in['description'] ?? '')]);
+        $objectId = (int)$db->lastInsertId();
+
+        $shift = $db->prepare(
+            "INSERT INTO staff_shifts(object_id,code,name,type,time_from,time_to,counts_as_work_day,active)
+             VALUES(?, 'П', 'Почивка', 'off', NULL, NULL, 0, 1)"
+        );
+        $shift->execute([$objectId]);
+        $db->commit();
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        throw $e;
+    }
+    out(['id' => $objectId,'success' => true]);
 }
 if (preg_match('#^/api/objects/(\d+)$#', $path, $m)) {
     $id = (int)$m[1];
