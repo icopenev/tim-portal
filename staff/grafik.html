@@ -1184,17 +1184,30 @@ async function loadWorkCalendar(
 
     try {
 
-        const calendarResponse =
-            await fetch(
-                '/staff-compat-api.php/api/calendar/' +
-                year +
-                '/' +
-                month,
-                {
-                    credentials:
-                        'same-origin'
-                }
-            );
+        const [calendarResponse, daysResponse] =
+            await Promise.all([
+                fetch(
+                    '/staff-compat-api.php/api/calendar/' +
+                    year +
+                    '/' +
+                    month,
+                    {
+                        credentials:
+                            'same-origin'
+                    }
+                ),
+                fetch(
+                    '/staff-compat-api.php/api/calendar/' +
+                    year +
+                    '/' +
+                    month +
+                    '/days',
+                    {
+                        credentials:
+                            'same-origin'
+                    }
+                )
+            ]);
 
 
         if (!calendarResponse.ok) {
@@ -1205,28 +1218,6 @@ async function loadWorkCalendar(
         }
 
 
-        const calendarData =
-            await calendarResponse.json();
-
-
-        workCalendar =
-            calendarData;
-
-
-        const daysResponse =
-            await fetch(
-                '/staff-compat-api.php/api/calendar/' +
-                year +
-                '/' +
-                month +
-                '/days',
-                {
-                    credentials:
-                        'same-origin'
-                }
-            );
-
-
         if (!daysResponse.ok) {
 
             throw new Error(
@@ -1235,9 +1226,15 @@ async function loadWorkCalendar(
         }
 
 
-        const daysData =
-            await daysResponse.json();
+        const [calendarData, daysData] =
+            await Promise.all([
+                calendarResponse.json(),
+                daysResponse.json()
+            ]);
 
+
+        workCalendar =
+            calendarData;
 
         workCalendarDays =
             Array.isArray(daysData)
@@ -1481,9 +1478,10 @@ async function init() {
         return;
     }
 
-    await loadEmployees();
-
-    await loadShifts();
+    await Promise.all([
+        loadEmployees(),
+        loadShifts()
+    ]);
 
     await loadSchedule();
 }
