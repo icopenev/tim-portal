@@ -10,9 +10,9 @@ if ($path === '/api/auth/logout') {
 }
 if ($path === '/api/objects' && $method === 'GET') {
     if (roleAdmin()) {
-        $q = $db->query("SELECT id,name,description,active,reported_hours_minus,reported_hours_plus FROM staff_objects WHERE active=1 ORDER BY name");
+        $q = $db->query("SELECT o.id,o.name,o.description,o.active,o.reported_hours_minus,o.reported_hours_plus,(SELECT COUNT(*) FROM staff_employees e WHERE e.object_id=o.id AND e.active=1) AS employee_count FROM staff_objects o WHERE o.active=1 ORDER BY o.name");
     } else {
-        $q = $db->prepare("SELECT o.id,o.name,o.description,o.active,o.reported_hours_minus,o.reported_hours_plus FROM staff_objects o JOIN staff_user_objects uo ON uo.object_id=o.id WHERE o.active=1 AND uo.user_id=? ORDER BY o.name");
+        $q = $db->prepare("SELECT o.id,o.name,o.description,o.active,o.reported_hours_minus,o.reported_hours_plus,(SELECT COUNT(*) FROM staff_employees e WHERE e.object_id=o.id AND e.active=1) AS employee_count FROM staff_objects o JOIN staff_user_objects uo ON uo.object_id=o.id WHERE o.active=1 AND uo.user_id=? ORDER BY o.name");
         $q->execute([(int)$_SESSION['user_id']]);
     }out($q->fetchAll());
 }
