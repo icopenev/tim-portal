@@ -38,17 +38,28 @@ body{
   min-height:100vh;
   background:var(--paper);
   color:var(--ink);
-  font-family:var(--sans);
-  padding:32px 40px 80px;
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+  padding:0 0 80px;
 }
 
 .wrap{
   max-width:none;
   width:100%;
   margin:0;
+  padding:32px 40px 0;
 }
 
-header{
+.portal-header{
+  background:#183346;
+  color:#fff;
+  padding:17px max(24px,calc((100vw - 1100px)/2));
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.portal-header strong{font-size:18px}
+.portal-header a{color:#fff;text-decoration:none;font-size:14px;font-weight:700}
+.report-head{
   border-bottom:2px solid var(--ink);
   padding-bottom:18px;
   margin-bottom:26px;
@@ -60,8 +71,8 @@ header{
 }
 
 h1{
-  font-family:var(--serif);
-  font-weight:600;
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+  font-weight:700;
   font-size:30px;
   margin:0 0 4px;
   letter-spacing:-0.01em;
@@ -340,7 +351,7 @@ footer{
     overflow-x:auto;
   }
 
-  header{
+  .report-head{
     align-items:flex-start;
   }
 }
@@ -349,13 +360,14 @@ footer{
 
 <body>
 
+<header class="portal-header"><strong>Настъпили промени</strong><a href="/">← Начало</a></header>
+
 <div class="wrap">
 
-<header>
+<header class="report-head">
 
   <div>
-    <h1>INFO · Настъпили промени</h1>
-    <a href="/" class="home-link">← Начало</a>
+    <h1>Настъпили промени</h1>
   </div>
 
   <div class="counts">
