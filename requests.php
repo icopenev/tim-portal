@@ -42,7 +42,7 @@ function next_step(array $r): string {
 .request-row{cursor:pointer}.request-row:hover{background:#f3f8fb}.request-row:focus-within{outline:2px solid #246b8d;outline-offset:-2px}
 .request-types{background:#fff;border:1px solid #d9e4e9;border-radius:15px;padding:24px 26px;margin-bottom:26px}.request-types h2{margin:0 0 15px;font-size:21px}.type-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.type-grid a{display:flex;align-items:center;justify-content:center;min-height:48px;padding:10px 12px;border:1px solid #d6e3e8;border-radius:9px;background:#f7fafb;color:#285f79;font-weight:750;text-align:center;text-decoration:none}.type-grid a:hover,.type-grid a:focus-visible{background:#edf5f8;border-color:#91adba}@media(max-width:760px){.type-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:430px){.type-grid{grid-template-columns:1fr}}
 </style>
-</head>
+<link rel="stylesheet" href="/assets/tim-theme.css?v=20261003"></head>
 <body>
 <header class="top"><div class="brand">ТИМ ЕАД</div><a href="/">← Начало</a></header>
 <main class="wrap">
